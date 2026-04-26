@@ -1,0 +1,819 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Auction - BidMaster</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            /* Checkered pattern background - darker */
+            background-image: 
+                linear-gradient(135deg, rgba(102, 126, 234, 0.12) 25%, transparent 25%), 
+                linear-gradient(225deg, rgba(102, 126, 234, 0.12) 25%, transparent 25%), 
+                linear-gradient(45deg, rgba(118, 75, 162, 0.12) 25%, transparent 25%), 
+                linear-gradient(315deg, rgba(118, 75, 162, 0.12) 25%, transparent 25%);
+            background-size: 40px 40px;
+            background-position: 0 0, 0 20px, 20px -20px, -20px 0px;
+            background-color: #f1f5f9;
+            position: relative;
+        }
+
+        /* Subtle overlay pattern - darker */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Animated floating elements */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        .floating-shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            top: 60%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        .floating-shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            top: 80%;
+            left: 30%;
+            animation-delay: -5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(-10px) rotate(180deg); }
+            75% { transform: translateY(-30px) rotate(270deg); }
+        }
+
+        /* Form Specific Styles */
+        .page-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            animation: rotate 20s linear infinite;
+        }
+
+        .page-header > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .page-header h1 {
+            color: #333;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header h1 i {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .form-card {
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 20px 50px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 200% 0; }
+            50% { background-position: -200% 0; }
+        }
+
+        .form-card .card-body {
+            padding: 3rem;
+            position: relative;
+        }
+
+        .form-section-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid transparent;
+            background: linear-gradient(90deg, #667eea, #764ba2) bottom;
+            background-size: 60px 2px;
+            background-repeat: no-repeat;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label .text-danger {
+            color: #ef4444 !important;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            padding: 0.875rem 1.25rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 
+                0 0 0 0.2rem rgba(102, 126, 234, 0.15),
+                0 4px 12px rgba(102, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateY(-1px);
+        }
+
+        .input-group-text {
+            border-radius: 12px 0 0 12px;
+            border: 2px solid #e5e7eb;
+            border-right: none;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            font-weight: 600;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .input-group:focus-within .input-group-text {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .input-group .form-control {
+            border-radius: 0 12px 12px 0;
+            border-left: none;
+        }
+
+        .input-group .form-control:focus {
+            border-left: none;
+        }
+
+        .btn-custom {
+            border-radius: 12px;
+            padding: 1rem 2.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-custom:hover::before {
+            left: 100%;
+        }
+
+        .btn-outline-secondary {
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border: 2px solid #6b7280;
+            color: #6b7280;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #6b7280;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 114, 128, 0.3);
+        }
+
+        .form-check-input {
+            width: 1.25em;
+            height: 1.25em;
+            border-radius: 6px;
+            border: 2px solid #d1d5db;
+            transition: all 0.3s ease;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3e%3cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3e%3c/svg%3e");
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .form-check-label {
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .was-validated .form-control:valid,
+        .was-validated .form-select:valid {
+            border-color: #10b981;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2310b981' d='m2.3 6.73.02-.02.01-.02C2.37 6.68 2.4 6.64 2.46 6.63L7.27 1.82c.13-.13.13-.34 0-.47-.13-.13-.34-.13-.47 0L2.4 5.75l-1.2-1.2c-.13-.13-.34-.13-.47 0-.13.13-.13.34 0 .47l1.3 1.31.02.02c.04.04.08.08.13.11.06.03.12.05.18.06.06.01.12.01.18-.01.06-.02.12-.05.16-.09z'/%3e%3c/svg%3e");
+        }
+
+        .was-validated .form-control:invalid,
+        .was-validated .form-select:invalid {
+            border-color: #ef4444;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6l.7.7m0 0l.7.7m-.7-.7l-.7.7m.7-.7l.7-.7'/%3e%3c/svg%3e");
+        }
+
+        .price-condition-note {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .price-condition-note::before {
+            content: '💡';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .price-condition-note h6 {
+            color: #667eea;
+            font-weight: 600;
+            margin: 0 0 0.5rem 2rem;
+            font-size: 0.9rem;
+        }
+
+        /* Toast styling */
+        .toast {
+            border-radius: 12px;
+            border: none;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .toast-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .toast-body {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-card .card-body {
+                padding: 2rem 1.5rem;
+            }
+
+            .btn-custom {
+                padding: 0.875rem 2rem;
+                font-size: 0.9rem;
+            }
+
+            .floating-shape {
+                display: none;
+            }
+        }
+
+        /* Loading animation for form submission */
+        .btn-custom.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-custom.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            right: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating background shapes -->
+    <div class="floating-shapes">
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+        <div class="floating-shape"></div>
+    </div>
+
+    <!-- Back to Dashboard Button -->
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h1><i class="bi bi-plus-circle-fill"></i> Create New Auction</h1>
+                        <a href="/decision" class="btn btn-outline-primary" style="border-radius: 12px; padding: 0.75rem 1.5rem; font-weight: 600; border: 2px solid #667eea; color: #667eea; transition: all 0.3s ease;">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                    <p class="text-muted mb-0">List a new item for auction and reach potential buyers worldwide</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card form-card">
+                    <div class="card-body">
+                        <h5 class="form-section-title mb-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>Auction Details
+                        </h5>
+                        <form id="createAuctionForm" class="needs-validation" method="POST" action="/new_auction" enctype="multipart/form-data" novalidate>
+                            <!-- CSRF Token for Django -->
+                            {% csrf_token %}
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <label class="form-label">
+                                        <i class="bi bi-tag-fill text-primary"></i>
+                                        Item Name <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" placeholder="Enter item name" name="name" required>
+                                    <div class="invalid-feedback">
+                                        Please provide a valid item name.
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="bi bi-grid-3x3-gap-fill text-primary"></i>
+                                        Category <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" name="category" required>
+                                        <option value="">Select category</option>
+                                        <option value="electronics">📱 Electronics</option>
+                                        <option value="art-collectibles">🎨 Art & Collectibles</option>
+                                        <option value="jewelry">💎 Jewelry</option>
+                                        <option value="vehicles">🚗 Vehicles</option>
+                                        <option value="fashion">👗 Fashion</option>
+                                        <option value="home-garden">🏠 Home & Garden</option>
+                                        <option value="sports">⚽ Sports</option>
+                                        <option value="books">📚 Books</option>
+                                        <option value="toys">🧸 Toys</option>
+                                        <option value="other">📦 Other</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a category.
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="price-condition-note">
+                                        <h6>💡 Price Condition Requirements</h6>
+                                        <p class="mb-0 small">Starting Price &lt; Reserve Price &lt; Buy Now Price</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        <i class="bi bi-currency-dollar text-success"></i>
+                                        Starting Price <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" placeholder="0.00" name="starting_price" min="0" step="0.01" required>
+                                        <div class="invalid-feedback">
+                                            Please provide a valid starting price.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+    <label class="form-label">
+        <i class="bi bi-shield-check text-warning"></i>
+        Reserve Price <span class="text-danger">*</span>
+    </label>
+    <div class="input-group">
+        <span class="input-group-text">$</span>
+        <input type="number" class="form-control" placeholder="0.00" 
+               name="reserve_price" min="0" step="0.01" required>
+        <div class="invalid-feedback">
+            Please provide a valid reserve price.
+        </div>
+    </div>
+</div>
+
+<div class="col-md-4">
+    <label class="form-label">
+        <i class="bi bi-lightning-charge-fill text-info"></i>
+        Buy Now Price <span class="text-danger">*</span>
+    </label>
+    <div class="input-group">
+        <span class="input-group-text">$</span>
+        <input type="number" class="form-control" placeholder="0.00" 
+               name="buy_now_price" min="0" step="0.01" required>
+        <div class="invalid-feedback">
+            Please provide a valid buy now price.
+        </div>
+    </div>
+</div>
+
+                                <div class="col-12">
+                                    <label class="form-label">
+                                        <i class="bi bi-card-text text-primary"></i>
+                                        Description <span class="text-danger">*</span>
+                                    </label>
+                                    <textarea class="form-control" rows="5" 
+                                              placeholder="Describe your item in detail - include features, condition, history, and any other relevant information that would interest potential buyers..." 
+                                              name="description" required></textarea>
+                                    <div class="invalid-feedback">
+                                        Please provide a detailed description.
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>Minimum 50 characters required for a good description
+                                    </small>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">
+                                        <i class="bi bi-camera-fill text-primary"></i>
+                                        Product Image <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="file" class="form-control" name="images" accept="image/*" required>
+                                    <div class="invalid-feedback">
+                                        Please upload an image of your item.
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        <i class="bi bi-image me-1"></i>Upload one clear, high-quality image (JPG, PNG, GIF - Max 5MB)
+                                    </small>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check d-flex align-items-start gap-3">
+                                        <input class="form-check-input mt-1" type="checkbox" id="termsCheck" name="checkbox" required>
+                                        <label class="form-check-label" for="termsCheck">
+                                            <strong>Terms & Conditions Agreement</strong><br>
+                                            <span class="text-muted small">
+                                                I confirm that all the details provided are accurate and complete. I understand that false information may result in auction cancellation.
+                                            </span>
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            You must agree to the terms and conditions.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex gap-3 justify-content-end pt-3 border-top">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary btn-custom">
+                                            <i class="bi bi-plus-circle-fill me-2"></i>Create Auction
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Display Django Messages -->
+    {% if messages %}
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11000;">
+            {% for message in messages %}
+                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="me-auto">
+                            {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle text-success"></i> Success
+                            {% else %}
+                                <i class="bi bi-exclamation-triangle text-danger"></i> Error
+                            {% endif %}
+                        </strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% load static %}
+    <script src="{% static 'accounts/main.js' %}"></script>
+
+    <script>
+        // Form validation and submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createAuctionForm');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Add loading state to form submission
+            form.addEventListener('submit', function(e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                } else {
+                    // Add loading state
+                    submitBtn.classList.add('loading');
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Creating Auction...';
+                    submitBtn.disabled = true;
+                    
+                    // Simulate processing time (remove if not needed)
+                    setTimeout(() => {
+                        if (!e.defaultPrevented) {
+                            form.submit();
+                        }
+                    }, 500);
+                }
+                form.classList.add('was-validated');
+            });
+
+            // Real-time description validation with character counter
+            const descriptionField = form.querySelector('textarea[name="description"]');
+            if (descriptionField) {
+                const helpText = descriptionField.parentNode.querySelector('.form-text');
+                
+                descriptionField.addEventListener('input', function() {
+                    const minLength = 50;
+                    const currentLength = this.value.length;
+                    
+                    helpText.innerHTML = `<i class="bi bi-info-circle me-1"></i>Character count: ${currentLength}/${minLength} minimum required`;
+                    
+                    if (currentLength < minLength) {
+                        this.setCustomValidity(`Description must be at least ${minLength} characters long.`);
+                        helpText.classList.remove('text-muted');
+                        helpText.classList.add('text-warning');
+                    } else {
+                        this.setCustomValidity('');
+                        helpText.classList.remove('text-warning');
+                        helpText.classList.add('text-success');
+                    }
+                });
+            }
+
+            // Enhanced price validation with real-time feedback
+            const startingPriceField = form.querySelector('input[name="starting_price"]');
+            const reservePriceField = form.querySelector('input[name="reserve_price"]');
+            const buyNowPriceField = form.querySelector('input[name="buy_now_price"]');
+
+            function validatePrices() {
+                const startingPrice = parseFloat(startingPriceField.value) || 0;
+                const reservePrice = parseFloat(reservePriceField.value) || 0;
+                const buyNowPrice = parseFloat(buyNowPriceField.value) || 0;
+
+                // Reset custom validity
+                startingPriceField.setCustomValidity('');
+                reservePriceField.setCustomValidity('');
+                buyNowPriceField.setCustomValidity('');
+
+                // Starting price validation
+                if (startingPrice <= 0) {
+                    startingPriceField.setCustomValidity('Starting price must be greater than $0');
+                }
+
+                // Reserve price validation
+                if (reservePrice > 0 && reservePrice <= startingPrice) {
+                    reservePriceField.setCustomValidity('Reserve price must be greater than starting price');
+                }
+
+                // Buy now price validation
+                if (buyNowPrice > 0) {
+                    if (buyNowPrice <= startingPrice) {
+                        buyNowPriceField.setCustomValidity('Buy now price must be greater than starting price');
+                    } else if (reservePrice > 0 && buyNowPrice <= reservePrice) {
+                        buyNowPriceField.setCustomValidity('Buy now price must be greater than reserve price');
+                    }
+                }
+
+                // Update price condition note styling
+                const conditionNote = document.querySelector('.price-condition-note');
+                if (startingPrice > 0 && reservePrice > 0 && buyNowPrice > 0) {
+                    if (startingPrice < reservePrice && reservePrice < buyNowPrice) {
+                        conditionNote.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                        conditionNote.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(52, 211, 153, 0.1))';
+                    } else {
+                        conditionNote.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+                        conditionNote.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(248, 113, 113, 0.1))';
+                    }
+                }
+            }
+
+            if (startingPriceField && reservePriceField && buyNowPriceField) {
+                startingPriceField.addEventListener('input', validatePrices);
+                reservePriceField.addEventListener('input', validatePrices);
+                buyNowPriceField.addEventListener('input', validatePrices);
+            }
+
+            // File input preview
+            const fileInput = form.querySelector('input[type="file"]');
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const helpText = this.parentNode.querySelector('.form-text');
+                        const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                        
+                        if (file.size > 5 * 1024 * 1024) {
+                            this.setCustomValidity('File size must be less than 5MB');
+                            helpText.innerHTML = `<i class="bi bi-exclamation-triangle text-danger me-1"></i>File too large: ${fileSize}MB (max 5MB)`;
+                            helpText.classList.add('text-danger');
+                        } else {
+                            this.setCustomValidity('');
+                            helpText.innerHTML = `<i class="bi bi-check-circle text-success me-1"></i>File selected: ${file.name} (${fileSize}MB)`;
+                            helpText.classList.remove('text-danger');
+                            helpText.classList.add('text-success');
+                        }
+                    }
+                });
+            }
+
+            // Enhanced toast messages
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                const bsToast = new bootstrap.Toast(toast, {
+                    delay: 6000
+                });
+                bsToast.show();
+                
+                // Auto-hide with fade effect
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => bsToast.hide(), 300);
+                }, 5500);
+            });
+
+            // Add smooth scrolling for validation errors
+            form.addEventListener('invalid', function(e) {
+                e.preventDefault();
+                const firstInvalidField = form.querySelector(':invalid');
+                if (firstInvalidField) {
+                    firstInvalidField.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                    setTimeout(() => firstInvalidField.focus(), 500);
+                }
+            }, true);
+
+            // Reset loading state if form submission fails
+            window.addEventListener('pageshow', function() {
+                if (submitBtn.classList.contains('loading')) {
+                    submitBtn.classList.remove('loading');
+                    submitBtn.innerHTML = originalBtnText;
+                    submitBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

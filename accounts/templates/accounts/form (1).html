@@ -1,0 +1,397 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Auction - BidMaster</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="page-header">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h1><i class="bi bi-plus-circle"></i> Create New Auction</h1>
+                        <a href="/decision" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left"></i> Back to Dashboard
+                        </a>
+                    </div>
+                    <p class="text-muted">List a new item for auction and reach potential buyers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Auction Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card form-card">
+                    <div class="card-body p-4">
+                        <h5 class="mb-4">Auction Details</h5>
+                        <form id="createAuctionForm" class="needs-validation" action="/new_auction" method="POST" enctype="multipart/form-data" novalidate>
+                           {% csrf_token %}
+                           <ul>
+                            {% for message in messages %}
+                            <li class="{{message.tags}}">{{message}}</li>
+                            {% endfor %}
+                            </ul>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Item Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" placeholder="Enter item name" name="name" required minlength="3" maxlength="100">
+                                    <div class="invalid-feedback">
+                                        Please provide a valid item name (3-100 characters).
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Category <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="category" required>
+                                        <option value="">Select category</option>
+                                        <option value="electronics">Electronics</option>
+                                        <option value="art-collectibles">Art & Collectibles</option>
+                                        <option value="jewelry">Jewelry</option>
+                                        <option value="vehicles">Vehicles</option>
+                                        <option value="fashion">Fashion</option>
+                                        <option value="home-garden">Home & Garden</option>
+                                        <option value="sports">Sports</option>
+                                        <option value="books">Books</option>
+                                        <option value="toys">Toys</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <div class="invalid-feedback">
+                                        Please select a category.
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Starting Price <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" placeholder="0.00" name="starting_price" min="0.01" step="0.01" required id="startingPrice">
+                                        <div class="invalid-feedback">
+                                            Please provide a valid starting price (minimum $0.01).
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Reserve Price <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" placeholder="0.00" name="reserve_price" min="0.01" step="0.01" required id="reservePrice">
+                                        <div class="invalid-feedback">
+                                            Reserve price must be higher than starting price.
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">Minimum price you're willing to accept</small>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Buy Now Price <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" placeholder="0.00" name="buy_now_price" min="0.01" step="0.01" required id="buyNowPrice">
+                                        <div class="invalid-feedback">
+                                            Buy now price must be higher than reserve price.
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">Fixed price for instant purchase</small>
+                                </div>
+                                
+                                
+                                
+                                
+                                
+                                <div class="col-12">
+                                    <label class="form-label">Description <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" rows="5" placeholder="Describe your item in detail - include features, condition, history, and any other relevant information" name="description" required minlength="50" maxlength="2000" id="description"></textarea>
+                                    <div class="invalid-feedback">
+                                        Please provide a detailed description (50-2000 characters).
+                                    </div>
+                                    <small class="form-text text-muted"><span id="charCount">0</span>/2000 characters (minimum 50 required)</small>
+                                </div>
+                                
+                                <div class="col-12">
+    <label class="form-label">Image <span class="text-danger">*</span></label>
+    <input type="file" class="form-control" name="images" accept="image/*" required>
+    <div class="invalid-feedback">
+        Please upload an image.
+    </div>
+    <small class="form-text text-muted">Upload one clear image of your item (JPG, PNG, GIF - Max 5MB)</small>
+</div>
+                                
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="checkbox" id="termsCheck" required>
+                                        <label class="form-check-label" for="termsCheck">
+                                            I agree to the <a href="#" class="text-primary">Terms and Conditions</a> and <a href="#" class="text-primary">Auction Policies</a> <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            You must agree to the terms and conditions.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="d-flex gap-3 justify-content-end">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                            <i class="bi bi-arrow-left"></i> Cancel
+                                        </button>
+                                        <button type="submit" class="btn btn-primary btn-custom" id="submitBtn">
+                                            <span class="spinner-border spinner-border-sm d-none" id="loadingSpinner" role="status" aria-hidden="true"></span>
+                                            <i class="bi bi-plus-circle" id="submitIcon"></i> 
+                                            <span id="submitText">Create Auction</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../static/js/main.js"></script>
+
+    <style>
+        .page-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: #333;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+        }
+
+        .form-card .card-body {
+            padding: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .input-group-text {
+            border-radius: 8px 0 0 8px;
+            border: 2px solid #e0e0e0;
+            border-right: none;
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+
+        .input-group .form-control {
+            border-radius: 0 8px 8px 0;
+            border-left: none;
+        }
+
+        .btn-custom {
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .was-validated .form-control:valid,
+        .was-validated .form-select:valid {
+            border-color: #28a745;
+        }
+
+        .was-validated .form-control:invalid,
+        .was-validated .form-select:invalid {
+            border-color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem;
+            }
+
+            .form-card .card-body {
+                padding: 1.5rem;
+            }
+
+            .btn-custom {
+                padding: 0.625rem 1.5rem;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('createAuctionForm');
+            const startingPrice = document.getElementById('startingPrice');
+            const reservePrice = document.getElementById('reservePrice');
+            const buyNowPrice = document.getElementById('buyNowPrice');
+            const description = document.getElementById('description');
+            const charCount = document.getElementById('charCount');
+            const imageUpload = document.getElementById('imageUpload');
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const submitIcon = document.getElementById('submitIcon');
+            const submitText = document.getElementById('submitText');
+
+            description.addEventListener('input', function() {
+                const count = this.value.length;
+                charCount.textContent = count;
+                
+                if (count < 50) {
+                    charCount.style.color = '#dc3545';
+                    this.setCustomValidity('Description must be at least 50 characters long.');
+                } else if (count > 2000) {
+                    charCount.style.color = '#dc3545'; 
+                    this.setCustomValidity('Description cannot exceed 2000 characters.');
+                } else {
+                    charCount.style.color = '#28a745';
+                    this.setCustomValidity('');
+                }
+            });
+
+            function validatePrices() {
+                const startVal = parseFloat(startingPrice.value) || 0;
+                const reserveVal = parseFloat(reservePrice.value) || 0;
+                const buyNowVal = parseFloat(buyNowPrice.value) || 0;
+
+                let isValid = true;
+
+                reservePrice.setCustomValidity('');
+                buyNowPrice.setCustomValidity('');
+
+                if (reservePrice.value && startingPrice.value) {
+                    if (reserveVal <= startVal) {
+                        reservePrice.setCustomValidity('Reserve price must be higher than starting price');
+                        isValid = false;
+                    }
+                }
+
+                if (buyNowPrice.value && reservePrice.value) {
+                    if (buyNowVal <= reserveVal) {
+                        buyNowPrice.setCustomValidity('Buy now price must be higher than reserve price');
+                        isValid = false;
+                    }
+                }
+
+                return isValid;
+            }
+
+            imageUpload.addEventListener('change', function() {
+                const files = this.files;
+                let isValid = true;
+                let errorMessage = '';
+
+                if (files.length === 0) {
+                    errorMessage = 'Please upload at least one image.';
+                    isValid = false;
+                } else if (files.length > 10) {
+                    errorMessage = 'Maximum 1 image allowed.';
+                    isValid = false;
+                } else {
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const fileSize = file.size / 1024 / 1024;
+                        
+                        if (fileSize > 5) {
+                            errorMessage = `File "${file.name}" is too large. Maximum 5MB per image.`;
+                            isValid = false;
+                            break;
+                        }
+                        
+                        if (!file.type.match(/^image\/(jpeg|jpg|png|gif)$/)) {
+                            errorMessage = `File "${file.name}" is not a supported image format.`;
+                            isValid = false;
+                            break;
+                        }
+                    }
+                }
+
+                this.setCustomValidity(isValid ? '' : errorMessage);
+            });
+
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (this === startingPrice || this === reservePrice || this === buyNowPrice) {
+                        validatePrices();
+                    }
+                    
+                    if (this.checkValidity()) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                });
+
+                input.addEventListener('input', function() {
+                    this.classList.remove('is-invalid', 'is-valid');
+                    
+                    if (this === startingPrice || this === reservePrice || this === buyNowPrice) {
+                        this.setCustomValidity('');
+                    }
+                });
+            });
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logout successful! Redirecting to login page...');
+                window.location.href = '/custom_logout';
+            }
+        }
+
+        window.addEventListener('beforeunload', function(e) {
+            const form = document.getElementById('createAuctionForm');
+            const hasData = Array.from(form.elements).some(element => {
+                return element.value && element.value.trim() !== '';
+            });
+
+            
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8">
+  <title>🤖 BidMaster Assistant</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background-color: blue;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+      padding: 25px;
+    }
+    .chat-box {
+      height: 420px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+    .user {
+      color: #2c3e50;
+      margin: 10px 0;
+      background: #e8eef3;
+      padding: 8px 10px;
+      border-radius: 6px;
+      width: fit-content;
+      max-width: 80%;
+    }
+    .bot {
+      color: #0c713d;
+      margin: 10px 0;
+      background: #dff6e3;
+      padding: 8px 10px;
+      border-radius: 6px;
+      width: fit-content;
+      max-width: 80%;
+    }
+    select, input, button {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #2c3e50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1e2d3a;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 style="text-align:center; color:#2c3e50;">🤖 BidMaster Auction Assistant</h1>
+    <p style="text-align:center; color:#555;">
+      Get help with bidding, listing products, prices, rules & auction guidance.
+    </p>
+
+    <div class="chat-box" id="chat"></div>
+
+    <!-- Updated Categories for BidMaster -->
+    <select id="category">
+      <option>Seller Help</option>
+      <option>Bidder Help</option>
+      <option>Pricing & Bids</option>
+      <option>Product Listing</option>
+      <option>Auction Rules</option>
+      <option>Account & Safety</option>
+      <option>Other</option>
+    </select>
+
+    <input type="number" id="max_tokens" value="300" min="50" max="1024" step="50" placeholder="Max Tokens">
+
+    <input type="text" id="message" placeholder="Type your message..." style="width:60%;">
+
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="clearChat()">Clear</button>
+  </div>
+
+  <script>
+    // === CSRF Setup ===
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // === Chat Logic ===
+    let chatHistory = [];
+
+    async function sendMessage() {
+      const message = document.getElementById("message").value.trim();
+      if (!message) return;
+
+      const category = document.getElementById("category").value;
+      const max_tokens = document.getElementById("max_tokens").value;
+      const chatBox = document.getElementById("chat");
+
+      chatBox.innerHTML += `<div class='user'><b>You:</b> ${message}</div>`;
+      document.getElementById("message").value = "";
+
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "bot";
+      typingDiv.id = "typing";
+      typingDiv.innerHTML = "<b>Bot:</b> typing...";
+      chatBox.appendChild(typingDiv);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const response = await fetch("/chatbot/api/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken,
+          },
+          body: JSON.stringify({
+            message,
+            category,
+            max_tokens,
+            history: chatHistory
+          })
+        });
+
+        let data;
+        try {
+          data = await response.json();
+        } catch (e) {
+          throw new Error("Invalid JSON response from server.");
+        }
+
+        document.getElementById("typing")?.remove();
+
+        if (data.reply) {
+          chatHistory = data.history;
+          chatBox.innerHTML += `<div class='bot'><b>Bot:</b> ${data.reply}</div>`;
+        } else if (data.error) {
+          chatBox.innerHTML += `<div class='bot' style='color:red;'><b>Error:</b> ${data.error}</div>`;
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+      } catch (err) {
+        document.getElementById("typing")?.remove();
+        chatBox.innerHTML += `<div class='bot' style='color:red;'><b>Error:</b> ${err.message}</div>`;
+      }
+    }
+
+    function clearChat() {
+      chatHistory = [];
+      document.getElementById("chat").innerHTML = "";
+    }
+  </script>
+</body>
+</html>

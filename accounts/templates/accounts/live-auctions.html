@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Auctions - BidMaster</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/decision">
+                <i class="bi bi-hammer text-primary"></i>
+                <span class="fw-bold">BidMaster</span>
+            </a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <a href="/decision" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-link" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="page-header bg-white p-4 rounded-3 shadow-sm">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 mb-2">
+                                <i class="bi bi-broadcast text-success"></i>
+                                Live Auctions
+                            </h1>
+                            <p class="text-muted mb-0">Currently active auctions approved by admin</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-success fs-6 px-3 py-2">
+                                <i class="bi bi-broadcast"></i> {{items}} Live Now
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="bg-white p-3 rounded-3 shadow-sm">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-6">
+                            <select id="categoryFilter" class="form-select">
+                                <option value="">All Categories</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Art & Collectibles">Art & Collectibles</option>
+                                <option value="Jewelry">Jewelry</option>
+                                <option value="Vehicles">Vehicles</option>
+                                <option value="Fashion">Fashion</option>
+                                <option value="Home & Garden">Home & Garden</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Books">Books</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input id="searchFilter" type="search" class="form-control" placeholder="Search auctions...">
+                        </div>
+                        <div class="col-md-2">
+                            <button id="clearFilters" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-arrow-clockwise"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        <!-- Live Auctions Grid -->
+        <div id="auctionCardsContainer" class="row g-4">
+            {% if good %}
+            {% for item in records %}
+            <!-- Live Auction 1 -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card auction-card border-0 shadow-lg h-100">
+                    <div class="position-relative auction-image-container">
+                        <img src="{{item.product_image.url}}" class="card-img-top auction-image" alt="{{item.product_name}}" style="height: 280px; object-fit: cover;">
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-success live-badge pulsing">
+                                <i class="bi bi-broadcast"></i> LIVE
+                            </span>
+                        </div>
+                        <div class="end-time-badge">
+                            <i class="bi bi-clock time-icon"></i>
+                            <span class="end-time-countdown" data-end-date="{{ item.product_end_date|date:'c' }}">
+                                00:00:00:00
+                            </span>
+                        </div>
+                        <div class="image-gradient-overlay"></div>
+                    </div>
+                    <div class="card-body auction-card-body">
+                        <div class="auction-category mb-2">
+                            <i class="bi bi-tag-fill"></i> {{item.category}}
+                        </div>
+                        <h5 class="card-title auction-title">{{item.product_name}}</h5>
+                        
+                        <div class="auction-stats-container mb-3">
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="stat-box current-bid">
+                                        <small class="stat-label">Current Bid</small>
+                                        <div class="stat-value text-success">${{item.product_current_price}}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-box time-left">
+                                        <small class="stat-label">Time Left</small>
+                                         <div class="countdown-timer stat-value text-danger"
+                                          data-end-date="{{ item.product_end_date|date:'c' }}" 
+                                        id="countdown-{{ item.product_id }}">
+                                        <span class="countdown-display">Loading...</span>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="auction-footer-stats mb-3">
+                            <div class="bid-info">
+                                <i class="bi bi-people-fill text-primary"></i>
+                                <span class="fw-bold">{{item.product_bids_count}}</span>
+                                <small class="text-muted">Total Bids</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <a href="/delete/{{item.product_id}}/'false'" class="btn btn-outline-danger btn-auction-action">
+                                <i class="bi bi-stop-circle"></i> End Auction
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            </div>
+            {% else %}
+            <h3>No live products!</h3>
+            {% endif %}
+
+           
+        <!-- Performance Stats -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="bg-white p-4 rounded-3 shadow-sm">
+                    <h5 class="mb-3">
+                        <i class="bi bi-graph-up"></i> Live Auctions Performance
+                    </h5>
+                    <div class="row text-center">
+                        
+                        <div class="col-md-3">
+                            <div class="border-end">
+                                <h3 class="text-primary">{{bids}}</h3>
+                                <p class="text-muted mb-0">Total Bids Received</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% if success %}
+    <script>
+        alert('Your product has been deleted!')
+        document.location='/live'
+    </script>
+    {% endif %}
+
+    {% if confirm %}
+    <script>
+        alert("Are you sure you want to delete the product. click OK!")
+        document.location="/delete/{{product_id}}/true";
+    </script>
+     {% endif %}
+        
+        
+       
+    <script>
+        // Countdown timer functionality
+        function initializeCountdowns() {
+            const countdownElements = document.querySelectorAll('.countdown-timer');
+            
+            countdownElements.forEach(element => {
+                const endDateStr = element.getAttribute('data-end-date');
+                const countdownDisplay = element.querySelector('.countdown-display');
+                const auctionId = element.id;
+                
+                if (endDateStr) {
+                    // Parse the end date (assuming format: YYYY-MM-DD HH:MM:SS or similar)
+                    const endDate = new Date(endDateStr);
+                    
+                    // Update countdown immediately
+                    updateCountdown(endDate, countdownDisplay, element);
+                    
+                    // Set interval to update every second
+                    setInterval(() => {
+                        updateCountdown(endDate, countdownDisplay, element);
+                    }, 1000);
+                }
+            });
+        }
+        
+        function updateCountdown(endDate, displayElement, parentElement) {
+            const now = new Date().getTime();
+            const endTime = endDate.getTime();
+            const timeRemaining = endTime - now;
+            
+            if (timeRemaining > 0) {
+                // Calculate time components
+                const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+                
+                // Format the display
+                let timeString = '';
+                
+                if (days > 0) {
+                    timeString = `${days}d ${hours}h ${minutes}m`;
+                    parentElement.className = parentElement.className.replace('text-danger', 'text-success');
+                } else if (hours > 0) {
+                    timeString = `${hours}h ${minutes}m ${seconds}s`;
+                    parentElement.className = parentElement.className.replace('text-success', 'text-warning');
+                } else if (minutes > 0) {
+                    timeString = `${minutes}m ${seconds}s`;
+                    parentElement.className = parentElement.className.replace('text-success text-warning', 'text-danger');
+                } else {
+                    timeString = `${seconds}s`;
+                    parentElement.className = parentElement.className.replace('text-success text-warning', 'text-danger');
+                }
+                
+                displayElement.innerHTML = `
+                    <i class="bi bi-clock"></i> ${timeString}
+                `;
+                
+                // Update the end time badge in the same card
+                const card = parentElement.closest('.card');
+                const endTimeCountdown = card.querySelector('.end-time-countdown');
+                if (endTimeCountdown) {
+                    // Format as DD:HH:MM:SS
+                    const formattedTime = 
+                        String(days).padStart(2, '0') + ':' +
+                        String(hours).padStart(2, '0') + ':' +
+                        String(minutes).padStart(2, '0') + ':' +
+                        String(seconds).padStart(2, '0');
+                    
+                    endTimeCountdown.textContent = formattedTime;
+                }
+                
+                // Add urgency styling for last hour
+                if (timeRemaining < 3600000) { // Less than 1 hour
+                    parentElement.className = parentElement.className.replace('text-success text-warning', 'text-danger');
+                    displayElement.style.animation = 'pulse 1s infinite';
+                }
+                
+                // Add critical styling for last 10 minutes
+                if (timeRemaining < 600000) { // Less than 10 minutes
+                    displayElement.style.animation = 'pulse 0.5s infinite';
+                    displayElement.innerHTML = `
+                        <i class="bi bi-exclamation-triangle"></i> ${timeString}
+                    `;
+                }
+                
+            } else {
+                // Auction has ended - for seller view
+                displayElement.innerHTML = `
+                    <i class="bi bi-stop-circle"></i> <span style="font-size: 0.9em;">ENDED</span>
+                `;
+                parentElement.className = parentElement.className.replace('text-success text-warning text-danger', 'text-secondary');
+                displayElement.style.animation = 'none';
+                
+                // Mark auction as ended in UI
+                const card = parentElement.closest('.card');
+                if (card && !card.classList.contains('auction-ended')) {
+                    card.classList.add('auction-ended');
+                    
+                    const liveBadge = card.querySelector('.badge.bg-success');
+                    if (liveBadge) {
+                        liveBadge.className = 'badge bg-secondary';
+                        liveBadge.textContent = 'ENDED';
+                    }
+                    
+                    const endTimeCountdown = card.querySelector('.end-time-countdown');
+                    if (endTimeCountdown) {
+                        endTimeCountdown.textContent = 'ENDED';
+                        endTimeCountdown.parentElement.style.background = 'rgba(220, 53, 69, 0.9)';
+                    }
+                    
+                    const actionButton = card.querySelector('.btn-outline-danger');
+                    if (actionButton) {
+                        actionButton.disabled = true;
+                        actionButton.innerHTML = '<i class="bi bi-archive"></i> Auction Ended';
+                    }
+                    
+                    // Add visual feedback for seller
+                    card.style.transition = 'opacity 1s ease, transform 1s ease';
+                    card.style.opacity = '0.7';
+                    card.style.transform = 'scale(0.98)';
+                }
+            }
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logout successful! Redirecting to login page...');
+                window.location.href =  '/custom_logout';
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Live auction monitoring started');
+            initializeCountdowns();
+            initializeFilters();
+        });
+        
+        // Filter functionality
+        function initializeFilters() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const searchFilter = document.getElementById('searchFilter');
+            const clearButton = document.getElementById('clearFilters');
+            const cardsContainer = document.getElementById('auctionCardsContainer');
+            
+            // Store original cards for filtering
+            const allCards = Array.from(cardsContainer.children);
+            
+            // Filter function
+            function filterCards() {
+                const selectedCategory = categoryFilter.value.toLowerCase();
+                const searchTerm = searchFilter.value.toLowerCase();
+                
+                allCards.forEach(card => {
+                    const categoryElement = card.querySelector('.auction-category');
+                    const titleElement = card.querySelector('.auction-title');
+                    
+                    if (categoryElement && titleElement) {
+                        const cardCategory = categoryElement.textContent.toLowerCase();
+                        const cardTitle = titleElement.textContent.toLowerCase();
+                        
+                        const matchesCategory = !selectedCategory || cardCategory.includes(selectedCategory);
+                        const matchesSearch = !searchTerm || cardTitle.includes(searchTerm) || cardCategory.includes(searchTerm);
+                        
+                        if (matchesCategory && matchesSearch) {
+                            card.style.display = '';
+                            card.style.animation = 'fadeIn 0.5s ease-in-out';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    }
+                });
+                
+                // Update results count
+                updateResultsCount();
+            }
+            
+            // Update results count
+            function updateResultsCount() {
+                const visibleCards = allCards.filter(card => card.style.display !== 'none').length;
+                const badge = document.querySelector('.badge.bg-success');
+                if (badge) {
+                    badge.innerHTML = `<i class="bi bi-broadcast"></i> ${visibleCards} Live Now`;
+                }
+            }
+            
+            // Clear all filters
+            function clearFilters() {
+                categoryFilter.value = '';
+                searchFilter.value = '';
+                allCards.forEach(card => {
+                    card.style.display = '';
+                    card.style.animation = 'fadeIn 0.5s ease-in-out';
+                });
+                updateResultsCount();
+            }
+            
+            // Event listeners
+            categoryFilter.addEventListener('change', filterCards);
+            searchFilter.addEventListener('input', filterCards);
+            clearButton.addEventListener('click', clearFilters);
+        }
+        
+        // Add CSS animation for filter effects
+        const filterAnimationCSS = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        
+        // Inject animation CSS
+        const style = document.createElement('style');
+        style.textContent = filterAnimationCSS;
+        document.head.appendChild(style);
+    </script>
+    
+    <!-- Enhanced Auction Cards CSS -->
+    <style>
+        /* Auction Card Enhancements */
+        .auction-card {
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            position: relative;
+        }
+        
+        .auction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.02), rgba(118, 75, 162, 0.02));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .auction-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 30px 60px rgba(102, 126, 234, 0.25);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        
+        .auction-card:hover::before {
+            opacity: 1;
+        }
+        
+        .auction-image-container {
+            overflow: hidden;
+            border-radius: 25px 25px 0 0;
+            position: relative;
+            height: 280px;
+        }
+        
+        .auction-image {
+            transition: all 0.6s ease;
+            border-radius: 25px 25px 0 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .auction-card:hover .auction-image {
+            transform: scale(1.08);
+        }
+        
+        .image-gradient-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .auction-card:hover .image-gradient-overlay {
+            opacity: 1;
+        }
+        
+        /* Auction ended state for seller view */
+        .auction-card.auction-ended {
+            opacity: 0.8;
+            filter: grayscale(20%);
+        }
+        
+        .auction-card.auction-ended:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.15);
+        }
+        
+        .live-badge {
+            background: linear-gradient(135deg, #28a745, #20c997) !important;
+            border-radius: 25px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .end-time-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            z-index: 3;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .end-time-badge .time-icon {
+            margin-right: 0.2rem;
+        }
+        
+        .pulsing {
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { 
+                box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+                transform: scale(1); 
+            }
+            50% { 
+                box-shadow: 0 8px 30px rgba(40, 167, 69, 0.6);
+                transform: scale(1.05); 
+            }
+        }
+        
+        .auction-card-body {
+            padding: 2rem;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .auction-category {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .auction-title {
+            color: #333;
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin: 1.2rem 0 0.8rem 0;
+            line-height: 1.3;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .auction-stats-container {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            box-shadow: inset 0 2px 10px rgba(102, 126, 234, 0.05);
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 0.5rem;
+        }
+        
+        .stat-label {
+            color: rgba(0, 0, 0, 0.6);
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-value {
+            font-weight: 800;
+            font-size: 1.2rem;
+            display: block;
+        }
+        
+        .current-bid .stat-value {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.4rem;
+        }
+        
+        .auction-footer-stats {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.2rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 15px;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+        }
+        
+        .bid-info {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.1rem;
+        }
+        
+        .btn-auction-action {
+            border-radius: 15px;
+            padding: 1rem 1.8rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            border: 2px solid #dc3545;
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-auction-action:hover {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border-color: #dc3545;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.4);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .countdown-timer {
+            font-size: 0.95em;
+            transition: color 0.3s ease;
+        }
+        
+        .countdown-timer .countdown-display {
+            display: inline-block;
+            font-weight: 700;
+        }
+        
+        /* Responsive countdown text */
+        @media (max-width: 768px) {
+            .countdown-timer {
+                font-size: 0.85em;
+            }
+            
+            .auction-card-body {
+                padding: 1.2rem;
+            }
+            
+            .auction-stats-container {
+                padding: 0.8rem;
+            }
+        }
+        
+        /* Badge transitions */
+        .badge {
+            transition: all 0.3s ease;
+        }
+        
+        /* Performance Stats Card Enhancement */
+        .bg-white {
+            background: linear-gradient(145deg, #ffffff, #f8f9fa) !important;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+    </style>
+</body>
+</html>

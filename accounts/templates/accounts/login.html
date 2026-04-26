@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BidMaster</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand text-gradient" href="/">
+                <i class="bi bi-hammer"></i> BidMaster
+            </a>
+
+            <div class="d-flex gap-2">
+                <a href="/" class="btn btn-outline-secondary btn-custom">
+                    <i class="bi bi-house"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5 col-md-7">
+                    <div class="auth-card">
+                        <div class="text-center mb-4">
+                            <div class="mb-3">
+                                <i class="bi bi-hammer text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <h2 class="fw-bold">Welcome Back</h2>
+                            <p class="text-muted">Sign in to your BidMaster account</p>
+                        </div>
+
+                        <!-- Toast Container -->
+                        <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 11000;">
+                            {% for message in messages %}
+                            <div class="toast show align-items-center text-white {% if message.tags == 'error' %}bg-danger{% elif message.tags == 'success' %}bg-success{% else %}bg-primary{% endif %} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle{% elif message.tags == 'success' %}bi-check-circle{% else %}bi-info-circle{% endif %} me-2"></i>
+                                        {{ message }}
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <form action="/login" method='post' id="loginForm" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label fw-semibold">
+                                    <i class="bi bi-person-circle"></i> Email or Username
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="loginEmail"
+                                       name="email"
+                                       placeholder="Enter your email or username"
+                                       required>
+                                <div class="invalid-feedback">
+                                    Please provide a valid email or username.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label fw-semibold">
+                                    <i class="bi bi-lock"></i> Password
+                                </label>
+                                <div class="input-group">
+                                    <input type="password"
+                                           class="form-control"
+                                           id="loginPassword"
+                                           name="password"
+                                           placeholder="Enter your password"
+                                           required>
+                                    <button class="btn btn-outline-secondary"
+                                            type="button"
+                                            id="togglePassword"
+                                            onclick="togglePasswordVisibility()">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Please provide your password.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="loginRole" class="form-label fw-semibold">
+                                    <i class="bi bi-person-badge"></i> Role
+                                </label>
+                                <select class="form-select"
+                                        id="loginRole"
+                                        name="role"
+                                        required>
+                                    <option value="">Select your role</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="seller">Seller</option>
+                                    <option value="bidder">Bidder</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select your role.
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 btn-custom mb-3">
+                                <i class="bi bi-box-arrow-in-right"></i> Sign In
+                            </button>
+
+                            
+
+                            
+
+                            <div class="text-center">
+                                <p class="text-muted mb-0">
+                                    Don't have an account?
+                                    <a href="signup" class="text-decoration-none text-primary fw-semibold">
+                                        Sign up here
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Toast Auto-Hide Script -->
+    <script>
+        // Auto-hide toasts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(function(toast) {
+                setTimeout(function() {
+                    const bsToast = new bootstrap.Toast(toast);
+                    bsToast.hide();
+                }, 5000);
+            });
+        });
+        
+        // Function to show custom toast notifications
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast_' + Date.now();
+            const iconClass = type === 'error' ? 'bi-exclamation-triangle' : type === 'success' ? 'bi-check-circle' : 'bi-info-circle';
+            const bgClass = type === 'error' ? 'bg-danger' : type === 'success' ? 'bg-success' : 'bg-primary';
+            
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="bi ${iconClass} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const newToast = document.getElementById(toastId);
+            const bsToast = new bootstrap.Toast(newToast);
+            bsToast.show();
+            
+            // Auto-hide after 5 seconds
+            setTimeout(function() {
+                bsToast.hide();
+                setTimeout(function() {
+                    newToast.remove();
+                }, 500);
+            }, 5000);
+        }
+    </script>
+
+    <script>
+        /*document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const email = document.getElementById('loginEmail');
+            const password = document.getElementById('loginPassword');
+            const role = document.getElementById('loginRole');
+
+            form.classList.remove('was-validated');
+
+            if (!email.value.trim()) {
+                email.setCustomValidity('Please provide a valid email or username.');
+                email.classList.add('is-invalid');
+            } else {
+                email.setCustomValidity('');
+                email.classList.remove('is-invalid');
+                email.classList.add('is-valid');
+            }
+
+            if (!password.value.trim()) {
+                password.setCustomValidity('Please provide your password.');
+                password.classList.add('is-invalid');
+            } else {
+                password.setCustomValidity('');
+                password.classList.remove('is-invalid');
+                password.classList.add('is-valid');
+            }
+
+            if (!role.value.trim()) {
+                role.setCustomValidity('Please select your role.');
+                role.classList.add('is-invalid');
+            } else {
+                role.setCustomValidity('');
+                role.classList.remove('is-invalid');
+                role.classList.add('is-valid');
+            }
+
+            if (form.checkValidity()) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Signing In...';
+                submitBtn.disabled = true;
+
+                setTimeout(() => {
+                    alert('Login successful! (This is a demo)');
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }, 1500);
+            }
+        });
+        */
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('loginPassword');
+            const toggleButton = document.getElementById('togglePassword');
+            const toggleIcon = toggleButton.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.className = 'bi bi-eye';
+            }
+        }
+
+        document.querySelectorAll('.form-control, .form-select').forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid', 'is-valid');
+                this.setCustomValidity('');
+            });
+        });
+
+        document.getElementById('loginEmail').addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailRegex.test(value) || value.length >= 3) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                    this.setCustomValidity('');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                    this.setCustomValidity('Please enter a valid email or username (min 3 characters).');
+                }
+            }
+        });
+
+        document.querySelectorAll('.form-control, .form-select').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                if (!this.value) {
+                    this.parentElement.classList.remove('focused');
+                }
+            });
+
+            if (input.value) {
+                input.parentElement.classList.add('focused');
+            }
+        });
+    </script>
+
+    <style>
+        .auth-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>') repeat;
+            opacity: 0.3;
+        }
+
+        .auth-card {
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #667eea;
+        }
+
+        .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #667eea;
+        }
+        
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .is-invalid {
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        .btn-outline-dark:hover {
+            background-color: #212529;
+            border-color: #212529;
+            color: white;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+        }
+    </style>
+</body>
+</html>

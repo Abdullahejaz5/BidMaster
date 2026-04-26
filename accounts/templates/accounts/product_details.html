@@ -1,0 +1,371 @@
+{% load static %}
+<style>
+.product-card {
+  max-width: 600px;
+  margin: auto;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.countdown-box {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 12px;
+  padding: 10px 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  gap: 15px;
+}
+
+.countdown-box .end-time-countdown {
+  color: #fff !important;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.countdown-box .time-icon {
+  color: #fff !important;
+}
+</style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Product Details</title>
+  <link rel="stylesheet" href="{% static 'css/product_detail.css' %}">
+  <!-- Bootstrap (optional if you're already using it) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+{% csrf_token %}
+<!-- Hidden element to store product category for JavaScript access -->
+<div id="product-category-data" style="display: none;">{{product.product_category}}</div>
+
+<div class="container my-5">
+  <div class="card product-card shadow-lg rounded-4">
+    
+    <!-- Product Image + Countdown -->
+    <div class="position-relative">
+      <img src="{{product.product_image.url}}" class="card-img-top rounded-top-4" alt="Product Image">
+      
+      <div class="countdown-box d-flex justify-content-center align-items-center end-time-badge">
+        <i class="bi bi-clock time-icon me-2"></i>
+        <span class="end-time-countdown fw-bold" data-end-date="{{ product.product_end_date|date:'c' }}" data-product-id="{{ product.product_id }}">
+          00:00:00:00
+        </span>
+      </div>
+    </div>
+
+    <!-- Product Info -->
+    <div class="card-body">
+      <h3 class="card-title">{{product.product_name}}</h3>
+
+      <p class="text-muted">{{product.product_desc}}</p>
+
+      <div class="d-flex justify-content-around my-3 p-3 bg-light rounded">
+        <div>
+          <p class="mb-1 fw-bold text-success">${{product.product_current_price}}</p>
+          <small>Current Bid</small>
+        </div>
+        <div>
+          <p class="mb-1 fw-bold">{{product.product_bids_count}}</p>
+          <small>Total Bids</small>
+        </div>
+      </div>
+
+      <!-- Bid Form -->
+      <form method="post" action="#">
+        {% csrf_token %}
+        <div class="input-group mb-3">
+          <span class="input-group-text">$</span>
+          <input type="number" class="form-control" name="bid_amount" placeholder="Enter your bid">
+          <button class="btn btn-success" type="submit">Submit Bid</button>
+        </div>
+      </form>
+
+      <a href="/live_to_show/{{product.product_category}}" class="btn btn-outline-primary w-100 mt-2">Back to Listings</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
+<script>
+    function initializeCountdowns() {
+        const countdownElements = document.querySelectorAll('.end-time-countdown');
+        countdownElements.forEach(element => {
+            const endDateStr = element.getAttribute('data-end-date');
+            if (endDateStr) {
+                const endDate = new Date(endDateStr);
+                updateCountdown(endDate, element);
+                setInterval(() => {
+                    updateCountdown(endDate, element);
+                }, 1000);
+            }
+        });
+    }
+
+    function updateCountdown(endDate, displayElement) {
+        const now = new Date().getTime();
+        const endTime = endDate.getTime();
+        const timeRemaining = endTime - now;
+        const parentBadge = displayElement.closest('.countdown-box');
+
+        if (timeRemaining > 0) {
+            const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+            const formattedTime =
+                String(days).padStart(2, '0') + ':' +
+                String(hours).padStart(2, '0') + ':' +
+                String(minutes).padStart(2, '0') + ':' +
+                String(seconds).padStart(2, '0');
+            displayElement.textContent = formattedTime;
+
+            // Color coding based on time remaining
+            if (timeRemaining < 3600000) { // Less than 1 hour
+                parentBadge.style.background = 'rgba(220, 53, 69, 0.9)';
+                parentBadge.style.color = 'white';
+            } else if (timeRemaining < 86400000) { // Less than 1 day
+                parentBadge.style.background = 'rgba(255, 193, 7, 0.9)';
+                parentBadge.style.color = 'black';
+            } else {
+                parentBadge.style.background = 'rgba(0, 0, 0, 0.8)';
+                parentBadge.style.color = 'white';
+            }
+        } else {
+            // Auction has ended - send time_up request if not already sent
+            if (!displayElement.dataset.timeUpSent) {
+                displayElement.dataset.timeUpSent = 'true';
+                const productId = displayElement.getAttribute('data-product-id');
+                
+                console.log(`⏰ AUCTION ENDED! Product ${productId}`);
+                
+                if (productId) {
+                    sendTimeUpRequest(productId);
+                } else {
+                    console.error('❌ No product ID found, redirecting to categories');
+                    showNotification('Auction ended. Redirecting...', 'warning');
+                    setTimeout(() => {
+                        window.location.href = '/categories';
+                    }, 2000);
+                }
+            }
+
+            displayElement.textContent = 'ENDED';
+            parentBadge.style.background = 'rgba(220, 53, 69, 0.9)';
+            parentBadge.style.color = 'white';
+            
+            // Disable any bid buttons or forms on the page
+            const bidButtons = document.querySelectorAll('button[type="submit"], .btn-primary');
+            bidButtons.forEach(button => {
+                if (button.textContent.toLowerCase().includes('bid')) {
+                    button.disabled = true;
+                    button.textContent = 'Auction Ended';
+                    button.classList.add('btn-secondary');
+                    button.classList.remove('btn-primary');
+                }
+            });
+        }
+    }
+
+    // Function to send time_up request to backend
+    function sendTimeUpRequest(productId) {
+        console.log(`🚀 Sending time_up request for product ${productId}...`);
+        
+        // Add CSRF token for authentication
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        const headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+        };
+        
+        if (csrfToken) {
+            headers['X-CSRFToken'] = csrfToken;
+        }
+
+        fetch(`/time_up/${productId}`, {
+            method: 'GET',
+            headers: headers,
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            console.log(`📡 Response received: Status ${response.status}`);
+            if (response.ok) {
+                console.log(`✅ Time up request sent successfully for product ${productId}`);
+                
+                // Show notification to user
+                showNotification('Auction has ended! Redirecting...', 'info');
+                
+                // Redirect to category page after 2 seconds
+                setTimeout(() => {
+                    const productCategory = getProductCategory();
+                    if (productCategory) {
+                        console.log(`🔄 Redirecting to category: ${productCategory}`);
+                        window.location.href = `/live_to_show/${productCategory}`;
+                    } else {
+                        console.log('🔄 Category not found, redirecting to categories page');
+                        window.location.href = '/categories';
+                    }
+                }, 2000);
+                
+            } else {
+                console.error(`❌ Failed to send time up request. Status: ${response.status}`);
+                handleTimeUpError(productId);
+            }
+        })
+        .catch(error => {
+            console.error('💥 Error sending time up request:', error);
+            handleTimeUpError(productId);
+        });
+    }
+
+    // Handle time_up request errors
+    function handleTimeUpError(productId) {
+        showNotification('Auction ended. Redirecting back to category...', 'warning');
+        setTimeout(() => {
+            const productCategory = getProductCategory();
+            if (productCategory) {
+                console.log(`🔄 Error fallback: Redirecting to category: ${productCategory}`);
+                window.location.href = `/live_to_show/${productCategory}`;
+            } else {
+                console.log('🔄 Error fallback: Category not found, redirecting to categories page');
+                window.location.href = '/categories';
+            }
+        }, 2000);
+    }
+
+    // Get product category from page context
+    function getProductCategory() {
+        // Primary method: Get category from the backend template variable
+        // We'll embed it in a hidden element to be accessible to JavaScript
+        const hiddenCategoryElement = document.getElementById('product-category-data');
+        if (hiddenCategoryElement) {
+            return hiddenCategoryElement.textContent.trim();
+        }
+        
+        // Fallback: Try to get category from various sources in the page
+        const categoryElement = document.querySelector('[data-category]');
+        if (categoryElement) {
+            return categoryElement.dataset.category;
+        }
+        
+        // Try to extract from breadcrumb or other elements
+        const breadcrumbs = document.querySelectorAll('.breadcrumb-item');
+        for (const breadcrumb of breadcrumbs) {
+            const text = breadcrumb.textContent.trim().toLowerCase();
+            if (text && text !== 'home' && text !== 'products' && text !== 'details') {
+                return text;
+            }
+        }
+        
+        return null;
+    }
+
+    // Show notification to user
+    function showNotification(message, type = 'info') {
+        // Remove existing notification
+        const existingNotification = document.getElementById('auctionNotification');
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.id = 'auctionNotification';
+        notification.className = `alert alert-${type === 'info' ? 'info' : type === 'warning' ? 'warning' : 'danger'} position-fixed`;
+        notification.style.cssText = `
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: none;
+            border-radius: 8px;
+            animation: slideInRight 0.3s ease;
+        `;
+        
+        const iconClass = type === 'info' ? 'bi-info-circle' : type === 'warning' ? 'bi-exclamation-triangle' : 'bi-exclamation-circle';
+        notification.innerHTML = `
+            <i class="bi ${iconClass}"></i>
+            ${message}
+        `;
+
+        // Add CSS for animation
+        if (!document.getElementById('notificationStyles')) {
+            const style = document.createElement('style');
+            style.id = 'notificationStyles';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Remove after 4 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }
+        }, 4000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🟢 Product details page loaded, initializing countdown...');
+        initializeCountdowns();
+        
+        // Log current product and timing info
+        const countdownElement = document.querySelector('.end-time-countdown');
+        if (countdownElement) {
+            const endDate = countdownElement.getAttribute('data-end-date');
+            const productId = countdownElement.getAttribute('data-product-id');
+            console.log(`📊 Product ID: ${productId}, End Date: ${endDate}`);
+            console.log(`🕒 Current time: ${new Date()}`);
+            
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                const timeRemaining = endDateTime.getTime() - new Date().getTime();
+                console.log(`⏱️ Time remaining: ${Math.floor(timeRemaining / 1000)} seconds`);
+                
+                if (timeRemaining <= 0) {
+                    console.log('🚨 AUCTION SHOULD BE ENDED!');
+                }
+            }
+        }
+    });
+</script>
+
+{% if less %}
+<script>
+    alert('Bid must be higher than the current bit')
+   
+</script>
+{% endif %}
+
+{% if won %}
+<script>
+    alert('Congratulations! you won the bit. Our team will reach you soon.')
+    document.location='/live_to_show/{{product.product_category}}'
+</script>
+{% endif %}
+
+{% if save %}
+<script>
+    alert('Your bid has been saved')
+
+</script>
+{% endif %}

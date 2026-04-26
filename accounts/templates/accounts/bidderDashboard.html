@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bidder Dashboard - BidMaster</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
+    
+    <style>
+        /* Dashboard Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow-x: hidden;
+            background: #f8f9fa;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand:hover {
+            color: white;
+        }
+
+        .sidebar-toggle {
+            color: white;
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .user-profile {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .user-info h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .sidebar-nav .nav-link:hover,
+        .sidebar-nav .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-footer .btn {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-footer .btn:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: #f8f9fa;
+            transition: margin-left 0.3s ease;
+            position: relative;
+        }
+
+        .content-area {
+            padding: 0;
+        }
+
+        /* Top Navigation */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            padding: 1rem 1.5rem;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,.15);
+        }
+
+        .stats-card.live {
+            border-left-color: #28a745;
+        }
+
+        .stats-card.won {
+            border-left-color: #007bff;
+        }
+
+        .stats-card.messages {
+            border-left-color: #17a2b8;
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stats-card.live .stats-icon {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .stats-card.won .stats-icon {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .stats-card.messages .stats-icon {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+        }
+
+        .stats-info h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+
+        .stats-info p {
+            margin: 0;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stats-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            color: #28a745;
+            margin-top: 0.5rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            /* Removed hover transform effect */
+        }
+
+        .dashboard-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1.5rem 1.5rem 1rem;
+        }
+
+        .dashboard-card .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: background 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: #e9ecef;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .activity-content h6 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-content p {
+            margin: 0 0 0.25rem 0;
+            color: #666;
+        }
+
+        /* Quick Actions */
+        .quick-actions .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        /* Welcome Header */
+        .welcome-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+        }
+
+        .welcome-header h1 {
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* Background Image */
+        .dashboard-background {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            opacity: 0.1;
+            z-index: 1;
+            width: 300px;
+            height: auto;
+        }
+
+        .dashboard-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Mobile Responsive */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .dashboard-background {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Custom scrollbar for sidebar */
+        .sidebar-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        /* Auction Cards Styles */
+        .auction-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            position: relative;
+        }
+
+        .auction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,.15);
+        }
+
+        .auction-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .auction-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .auction-card:hover .auction-image img {
+            transform: scale(1.05);
+        }
+
+        .auction-status {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            background: #28a745;
+            z-index: 2;
+        }
+
+        .auction-status.ended {
+            background: #dc3545;
+        }
+
+        .auction-timer {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .auction-details {
+            padding: 1.5rem;
+        }
+
+        .auction-details h6 {
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .auction-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .auction-meta div {
+            text-align: center;
+        }
+
+        .auction-meta small {
+            color: #666;
+            display: block;
+        }
+
+        .auction-meta strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .current-bid {
+            color: #28a745;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .auction-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .auction-actions .btn {
+            flex: 1;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+        }
+
+        /* Dashboard Image Styles */
+        .dashboard-image-display {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0 0 15px 15px;
+            background-color: #f8f9fa;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auction-main-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 0 0 15px 15px;
+        }
+
+        /* Remove the old hover-based image container styles */
+        .dashboard-image-container {
+            display: none;
+        }
+
+        .dashboard-main-image {
+            display: none;
+        }
+
+        .dashboard-image-overlay {
+            display: none;
+        }
+
+        .overlay-content {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .overlay-content h4 {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .overlay-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .overlay-content .btn {
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .overlay-content .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+    {% load static %}
+<body class="bg-light">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">
+                <i class="bi bi-hammer"></i>
+                <span>BidMaster</span>
+            </a>
+            <button class="btn btn-link sidebar-toggle d-lg-none" id="sidebarToggle">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="user-info">
+                    <h6>{{name}} Bidder</h6>
+                    <span class="badge bg-success">Active</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" data-section="dashboard">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/categories">
+                            <i class="bi bi-grid"></i>
+                            <span>All Auctions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/winnings">
+                            <i class="bi bi-trophy"></i>
+                            <span>Won Auctions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/bidder_messages" >
+                            <i class="bi bi-chat-dots"></i>
+                            <span>Messages</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2" href="/chatbot">
+                        <i class="bi bi-robot fs-5" style="color:#ffffff;"></i>
+                            <span>AI Auction Assistant</span>
+                         </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="btn btn-outline-danger w-100" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Background Image -->
+        <img src="../static/images/bidderDashboard.jpg" alt="Background" class="dashboard-background">
+        
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+            <div class="container-fluid">
+                <button class="btn btn-link d-lg-none" id="sidebarToggleMobile">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <div class="navbar-brand d-lg-none">
+                    <i class="bi bi-hammer"></i> BidMaster
+                </div>
+                
+                <div class="ms-auto d-flex align-items-center gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-link" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle fs-4"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="content-area dashboard-content" id="contentArea">
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="dashboard">
+                <div class="container-fluid py-2">
+                    <!-- Welcome Header -->
+                    <!-- <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="welcome-header">
+                                <h1 class="mb-2">Welcome back, {{name}}! 👋</h1>
+                                <p class="text-muted">Here's what's happening with your bidding activity today.</p>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- Quick Actions & Recent Activity -->
+                    <div class="row g-2 mb-2">
+                        <div class="col-12">
+                            <div class="card dashboard-card">
+                                <div class="card-header text-center">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-hammer"></i> Welcome to BidMaster , {{name}}!
+                                    </h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="dashboard-image-display">
+                                        <img src="https://media.istockphoto.com/id/1080339932/vector/auctioneer-and-bidding-vector-flat-illustration.jpg?s=612x612&w=0&k=20&c=HqTjWBYUhngDhQEMM7vzEsJnWQQ8LiLjEUGW_gwXiyI=" 
+                                             alt="Auction Image"
+                                             class="auction-main-image">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                    </div>
+
+                    
+
+                    <!-- Stats Cards -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="stats-card live" onclick="navigateToPage('allAuctions')">
+                                <div class="stats-icon">
+                                    <i class="bi bi-broadcast"></i>
+                                </div>
+                                <div class="stats-info1">
+                                    <h3>{{live}}</h3>
+                                    <p>Live Auctions</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 col-md-6">
+                            <div class="stats-card won" onclick="navigateToPage('bidderWonAuctions')">
+                                <div class="stats-icon">
+                                    <i class="bi bi-trophy"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{winnings}}</h3>
+                                    <p>Won Auctions</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4 col-md-6">
+                            <div class="stats-card messages" onclick="navigateToMessages()">
+                                <div class="stats-icon">
+                                    <i class="bi bi-chat-dots"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{messages}}</h3>
+                                    <p>Messages</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    
+
+                    <!-- Live Auctions Section -->
+                    
+                    
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <script>
+        // Dashboard JavaScript functionality
+
+        // Call any initialization when page loads
+        window.addEventListener('load', function() {
+            console.log('Dashboard loaded successfully!');
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile sidebar toggle
+            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+            function openMobileSidebar() {
+                sidebar.classList.add('show');
+                sidebarOverlay.classList.add('show');
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            }
+
+            if (sidebarToggleMobile) {
+                sidebarToggleMobile.addEventListener('click', openMobileSidebar);
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', closeMobileSidebar);
+            }
+
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            }
+
+            // Initialize charts
+            initializeCharts();
+
+            // Animate stats cards on load
+            animateStatsCards();
+
+            // Create auction cards
+            createAuctionCards();
+
+            // Start countdown timers
+            startCountdownTimers();
+        });
+
+        // Create auction cards with random data
+        function createAuctionCards() {
+            const auctionCards = document.getElementById('auctionCards');
+            const images = [
+                '../static/images/img1.jpeg',
+                '../static/images/img2.jpeg',
+                '../static/images/img3.jpeg',
+                '../static/images/img4.jpeg'
+            ];
+            
+            const auctions = [
+                {
+                    title: 'Vintage Rolex Watch',
+                    category: 'Watches',
+                    currentBid: 2850,
+                    bids: 23,
+                    endTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 15 * 60 * 60 * 1000).getTime(), // 2 days 15 hours from now
+                    image: images[0]
+                },
+                {
+                    title: 'MacBook Pro 16"',
+                    category: 'Electronics',
+                    currentBid: 1850,
+                    bids: 15,
+                    endTime: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000 + 8 * 60 * 60 * 1000).getTime(), // 1 day 8 hours from now
+                    image: images[1]
+                },
+                {
+                    title: 'Diamond Ring',
+                    category: 'Jewelry',
+                    currentBid: 5500,
+                    bids: 31,
+                    endTime: new Date(Date.now() + 3 * 60 * 60 * 1000).getTime(), // 3 hours from now
+                    image: images[2]
+                },
+                {
+                    title: 'Gaming Console',
+                    category: 'Electronics',
+                    currentBid: 485,
+                    bids: 12,
+                    endTime: new Date(Date.now() + 45 * 60 * 1000).getTime(), // 45 minutes from now
+                    image: images[3]
+                },
+                {
+                    title: 'Art Painting',
+                    category: 'Art',
+                    currentBid: 1200,
+                    bids: 8,
+                    endTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).getTime(), // 5 days from now
+                    image: images[0]
+                },
+                {
+                    title: 'Sports Car',
+                    category: 'Vehicles',
+                    currentBid: 25000,
+                    bids: 45,
+                    endTime: new Date(Date.now() - 30 * 60 * 1000).getTime(), // 30 minutes ago (ended)
+                    image: images[1]
+                }
+            ];
+
+            auctions.forEach((auction, index) => {
+                const isEnded = auction.endTime < Date.now();
+                const cardHtml = `
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card auction-card h-100">
+                            <div class="auction-image">
+                                <img src="${auction.image}" class="card-img-top" alt="${auction.title}">
+                                <div class="auction-status ${isEnded ? 'ended' : ''}">${isEnded ? 'ENDED' : 'LIVE'}</div>
+                                <div class="auction-timer" id="timer-${index}">
+                                    ${isEnded ? 'ENDED' : ''}
+                                </div>
+                            </div>
+                            <div class="card-body auction-details">
+                                <h6 class="card-title">${auction.title}</h6>
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-tag"></i> ${auction.category}
+                                </p>
+                                
+                                <div class="auction-meta">
+                                    <div>
+                                        <small>Current Bid</small>
+                                        <div class="current-bid">$${auction.currentBid.toLocaleString()}</div>
+                                    </div>
+                                    <div>
+                                        <small>Total Bids</small>
+                                        <div class="fw-bold">${auction.bids}</div>
+                                    </div>
+                                </div>
+
+                                <div class="auction-actions">
+                                    <button class="btn btn-success btn-sm" onclick="placeBid(${index})" ${isEnded ? 'disabled' : ''}>
+                                        <i class="bi bi-currency-dollar"></i> ${isEnded ? 'Ended' : 'Bid'}
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="viewDetails(${index})">
+                                        <i class="bi bi-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                auctionCards.innerHTML += cardHtml;
+            });
+
+            // Store auction data for timer updates
+            window.auctionData = auctions;
+        }
+
+        // Start and update countdown timers
+        function startCountdownTimers() {
+            setInterval(updateTimers, 1000);
+            updateTimers(); // Initial call
+        }
+
+        function updateTimers() {
+            if (!window.auctionData) return;
+
+            window.auctionData.forEach((auction, index) => {
+                const timerElement = document.getElementById(`timer-${index}`);
+                if (!timerElement) return;
+
+                const now = Date.now();
+                const timeLeft = auction.endTime - now;
+
+                if (timeLeft <= 0) {
+                    // Auction ended
+                    timerElement.textContent = 'ENDED';
+                    const statusElement = timerElement.parentElement.querySelector('.auction-status');
+                    if (statusElement && !statusElement.classList.contains('ended')) {
+                        statusElement.textContent = 'ENDED';
+                        statusElement.classList.add('ended');
+                        
+                        // Disable bid button
+                        const bidButton = timerElement.closest('.auction-card').querySelector('.btn-success');
+                        if (bidButton) {
+                            bidButton.disabled = true;
+                            bidButton.innerHTML = '<i class="bi bi-x-circle"></i> Ended';
+                        }
+
+                        // Make API call to backend (simulated)
+                        console.log(`Auction ${index} ended - sending API call to backend`);
+                        // This is where you would make the actual API call
+                        sendAuctionEndedAPI(index);
+                    }
+                } else {
+                    // Calculate time remaining
+                    const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                    let timeString = '';
+                    if (days > 0) {
+                        timeString = `${days}d ${hours}h ${minutes}m`;
+                    } else if (hours > 0) {
+                        timeString = `${hours}h ${minutes}m ${seconds}s`;
+                    } else {
+                        timeString = `${minutes}m ${seconds}s`;
+                    }
+
+                    timerElement.textContent = timeString;
+                }
+            });
+        }
+
+        // Simulate API call when auction ends
+        function sendAuctionEndedAPI(auctionIndex) {
+            // This would be replaced with actual API call
+            console.log(`API Call: Auction ${auctionIndex} has ended`);
+            
+            // Example of what the API call might look like:
+            /*
+            fetch('/api/auction/ended', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    auctionId: auctionIndex,
+                    endTime: new Date().toISOString()
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Auction end confirmed:', data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+            */
+        }
+
+        // Place bid function
+        function placeBid(auctionIndex) {
+            alert(`Placing bid on auction: ${window.auctionData[auctionIndex].title}. This will be implemented by the backend team.`);
+        }
+
+        // View details function
+        function viewDetails(auctionIndex) {
+            alert(`Viewing details for: ${window.auctionData[auctionIndex].title}. This will be implemented by the backend team.`);
+        }
+
+        // Initialize Chart.js charts
+        function initializeCharts() {
+            // Bidding Activity Chart
+            const biddingCtx = document.getElementById('biddingChart');
+            if (biddingCtx) {
+                new Chart(biddingCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Bids Placed',
+                            data: [12, 19, 8, 25, 15, 22],
+                            borderColor: 'rgb(102, 126, 234)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Category Interest Chart
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Electronics', 'Art', 'Jewelry', 'Collectibles'],
+                        datasets: [{
+                            data: [30, 25, 20, 25],
+                            backgroundColor: [
+                                '#28a745',
+                                '#007bff',
+                                '#ffc107',
+                                '#17a2b8'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Animate stats cards with counting effect
+        function animateStatsCards() {
+            const statsNumbers = document.querySelectorAll('.stats-info h3');
+            
+            statsNumbers.forEach(number => {
+                const finalNumber = parseInt(number.textContent);
+                let currentNumber = 0;
+                const increment = finalNumber / 20;
+                const timer = setInterval(() => {
+                    currentNumber += increment;
+                    if (currentNumber >= finalNumber) {
+                        number.textContent = finalNumber;
+                        clearInterval(timer);
+                    } else {
+                        number.textContent = Math.floor(currentNumber);
+                    }
+                }, 50);
+            });
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Here you would typically make an API call to logout
+                alert('Logout successful! Redirecting to login page...');
+                // Redirect to login page
+                window.location.href = '/custom_logout';
+            }
+        }
+
+        // Navigate to different pages function
+        function navigateToPage(page) {
+            switch(page) {
+                case 'allAuctions':
+                    window.location.href = '/categories';
+                    break;
+                case 'bidderWonAuctions':
+                    window.location.href = '/winnings';
+                    break;
+                default:
+                    console.log('Unknown page:', page);
+            }
+        }
+
+        // Navigate to messages (placeholder - will be implemented later)
+        function navigateToMessages() {
+            document.location='/bidder_messages'
+            
+        }
+
+        // Real-time updates simulation
+        function simulateRealTimeUpdates() {
+            setInterval(() => {
+                // Update live auction count randomly
+                const liveAuctionsCount = document.querySelector('.stats-card.live .stats-info h3');
+                if (liveAuctionsCount && Math.random() > 0.8) {
+                    let count = parseInt(liveAuctionsCount.textContent);
+                    count = Math.max(20, count + (Math.random() > 0.5 ? 1 : -1));
+                    liveAuctionsCount.textContent = count;
+                }
+
+                // Update messages count
+                const messagesCount = document.querySelector('.stats-card.messages .stats-info h3');
+                if (messagesCount && Math.random() > 0.9) {
+                    let count = parseInt(messagesCount.textContent);
+                    count = Math.max(0, count + 1);
+                    messagesCount.textContent = count;
+                }
+            }, 15000); // Update every 15 seconds
+        }
+
+        // Start real-time updates
+        simulateRealTimeUpdates();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Detail - BidMaster</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: #f8f9fa;
+        }
+
+        .navbar {
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0,0,0,.05);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease;
+        }
+
+        .page-header:hover {
+            transform: translateY(-2px);
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(0,0,0,.12);
+        }
+
+        /* Enhanced search input styles */
+        .search-input-container {
+            position: relative;
+        }
+
+        #searchInput {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        #searchInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: scale(1.02);
+        }
+
+        #clearSearch {
+            border: none;
+            background: transparent;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        #clearSearch:hover {
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+
+        /* Search highlighting */
+        .search-highlight {
+            background: linear-gradient(120deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1px 3px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        /* Search match animation */
+        .search-match {
+            animation: searchPulse 0.6s ease-in-out;
+            border: 2px solid rgba(102, 126, 234, 0.3) !important;
+        }
+
+        @keyframes searchPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        /* Enhanced filter controls */
+        .form-select, .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        /* No results animation */
+        #noResults {
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Results counter styling */
+        #searchResults {
+            animation: slideInDown 0.4s ease-out;
+            border-left: 4px solid #667eea;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Enhanced button styles */
+        .btn-outline-primary:hover {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-color: transparent;
+            transform: translateY(-1px);
+        }
+
+        .auction-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+            border: none;
+            position: relative;
+        }
+
+        .auction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,.15);
+        }
+
+        /* Auction ended state */
+        .auction-card.auction-ended {
+            opacity: 0.6;
+            transform: scale(0.98);
+            filter: grayscale(30%);
+        }
+
+        .auction-card.auction-ended:hover {
+            transform: scale(0.98);
+            box-shadow: 0 4px 15px rgba(0,0,0,.1);
+        }
+
+        .auction-image {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .auction-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .auction-card:hover .auction-image img {
+            transform: scale(1.05);
+        }
+
+        .auction-status {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            background: #28a745;
+            z-index: 2;
+        }
+
+        .auction-timer {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 2;
+        }
+
+        .auction-details {
+            padding: 1.5rem;
+        }
+
+        .auction-details h5 {
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .auction-category {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .auction-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .auction-meta div {
+            text-align: center;
+        }
+
+        .auction-meta small {
+            color: #666;
+            display: block;
+        }
+
+        .auction-meta strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .current-bid {
+            color: #28a745;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .bid-count {
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .auction-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .auction-actions .btn {
+            flex: 1;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .btn-custom {
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary.btn-custom {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+        }
+
+        .btn-primary.btn-custom:hover {
+            background: linear-gradient(45deg, #5a67d8, #6b46c1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success.btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-outline-primary.btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .watch-btn {
+            position: absolute;
+            top: 1rem;
+            right: 3rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .watch-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .watch-btn.watched {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .end-time-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            z-index: 3;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .end-time-badge .time-icon {
+            margin-right: 0.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .auction-meta {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .auction-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    {% csrf_token %}
+    <!-- Navigation Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/decision">
+                <i class="bi bi-hammer text-primary"></i>
+                <span class="fw-bold">BidMaster</span>
+            </a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <a href="/categories" class="btn btn-outline-secondary btn-custom">
+                    <i class="bi bi-arrow-left"></i> All Categories
+                </a>
+                <a href="/decision" class="btn btn-outline-primary btn-custom">
+                    <i class="bi bi-house"></i> Dashboard
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-link" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle fs-4"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="page-header p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="h2 mb-2">
+                                <i class="bi bi-laptop text-primary" id="categoryIcon"></i>
+                                <h3>{{category}} Auctions</h3>
+                                
+                            </h1>
+                            <p class="text-muted mb-0" id="categoryDescription">Discover amazing {{category}} deals in live auctions</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-success fs-6 px-3 py-2">
+                                <i class="bi bi-broadcast"></i> <span id="liveCount">{{live}}</span> Live Now
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="filter-section p-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="search" class="form-control" placeholder="Search auctions by name, category, or description..." id="searchInput">
+                                <button class="btn btn-outline-secondary" type="button" id="clearSearch" title="Clear search">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="sortFilter">
+                                <option value="ending-soon">Ending Soon</option>
+                                <option value="newest">Newest First</option>
+                                <option value="price-low">Price: Low to High</option>
+                                <option value="price-high">Price: High to Low</option>
+                                <option value="most-bids">Most Bids</option>
+                                <option value="alphabetical">Alphabetical</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="priceFilter">
+                                <option value="">All Prices</option>
+                                <option value="0-100">$0 - $100</option>
+                                <option value="100-500">$100 - $500</option>
+                                <option value="500-1000">$500 - $1,000</option>
+                                <option value="1000-5000">$1,000 - $5,000</option>
+                                <option value="5000+">$5,000+</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary w-100" type="button" onclick="clearAllFilters()">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset All
+                            </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auctions Grid -->
+        <div class="row g-4" id="auctionsGrid">
+            {% for product in products %}
+            <!-- Live Auction 1 -->
+            <div class="col-lg-4 col-md-6" 
+                 data-price="{{product.product_current_price}}" 
+                 data-bids="{{product.product_bids_count}}" 
+                 data-ending="{{product.product_end_date|date:'c'}}"
+                 data-name="{{product.product_name|lower}}"
+                 data-category="{{product.product_category|lower}}"
+                 data-created="{{product.product_date|date:'c'}}"
+                 data-description="{{product.product_description|lower}}"
+                 data-seller="{{product.product_seller|lower}}"
+                 data-searchable="{{product.product_name|lower}} {{product.product_category|lower}} {{product.product_description|lower}}"
+                 data-product-id="{{product.product_id}}">
+                <div class="card auction-card h-100">
+                    <div class="auction-image">
+                        <img src="{{product.product_image.url}}" class="card-img-top" alt="iPhone 15 Pro">
+                        <div class="auction-status">LIVE</div>
+                        <div class="end-time-badge">
+                            <i class="bi bi-clock time-icon"></i>
+                            <span class="end-time-countdown" 
+                                  data-end-date="{{ product.product_end_date|date:'c' }}"
+                                  data-product-id="{{ product.product_id }}">
+                                00:00:00:00
+                            </span>
+                        </div>
+                        <button class="watch-btn" onclick="toggleWatch(this)">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                    </div>
+                    <div class="card-body auction-details">
+                        <h5 class="card-title">{{product.product_name}}</h5>
+                        
+                        
+                        <div class="auction-meta">
+                            <div>
+                                <small>Current Bid</small>
+                                <div class="current-bid">${{product.product_current_price}}</div>
+                            </div>
+                            <div>
+                                <small>Total Bids</small>
+                                <div class="bid-count">{{product.product_bids_count}}</div>
+                            </div>
+                        </div>
+
+                        <div class="auction-actions">
+                            <a href="/show_details/{{product.product_id}}" class="btn btn-success btn-custom">
+                                <i class="bi bi-currency-dollar"></i> Place Bid
+                            </a>
+                            <a href="/show_details/{{product.product_id}}" class="btn btn-outline-primary btn-custom">
+                                <i class="bi bi-currency-dollar"></i> Details
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            {% endfor %}
+
+        </div>
+
+        
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Get category from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category') || 'electronics';
+
+        // Category configurations
+        const categoryConfig = {
+            electronics: {
+                title: 'Electronics',
+                icon: 'bi-laptop',
+                description: 'Discover amazing electronics deals in live auctions',
+                liveCount: 245
+            },
+            art: {
+                title: 'Art & Collectibles',
+                icon: 'bi-palette',
+                description: 'Unique art pieces and rare collectibles await you',
+                liveCount: 189
+            },
+            jewelry: {
+                title: 'Jewelry',
+                icon: 'bi-gem',
+                description: 'Premium jewelry and luxury accessories',
+                liveCount: 156
+            },
+            watches: {
+                title: 'Watches',
+                icon: 'bi-stopwatch',
+                description: 'Luxury timepieces and vintage watches',
+                liveCount: 98
+            },
+            vehicles: {
+                title: 'Vehicles',
+                icon: 'bi-car-front',
+                description: 'Cars, motorcycles, and luxury vehicles',
+                liveCount: 67
+            },
+            fashion: {
+                title: 'Fashion',
+                icon: 'bi-bag',
+                description: 'Designer fashion and luxury apparel',
+                liveCount: 123
+            },
+            home: {
+                title: 'Home & Garden',
+                icon: 'bi-house',
+                description: 'Furniture, appliances, and home essentials',
+                liveCount: 187
+            },
+            sports: {
+                title: 'Sports',
+                icon: 'bi-trophy',
+                description: 'Sports equipment and memorabilia',
+                liveCount: 145
+            },
+            books: {
+                title: 'Books & Media',
+                icon: 'bi-book',
+                description: 'Rare books, records, and vintage media',
+                liveCount: 234
+            },
+            toys: {
+                title: 'Toys & Games',
+                icon: 'bi-controller',
+                description: 'Collectible toys and vintage games',
+                liveCount: 198
+            }
+        };
+
+        // Initialize page based on category
+        function initializePage() {
+            const config = categoryConfig[category] || categoryConfig.electronics;
+            
+            document.getElementById('categoryIcon').className = `${config.icon} text-primary`;
+            document.getElementById('categoryTitle').textContent = config.title;
+            document.getElementById('categoryDescription').textContent = config.description;
+            document.getElementById('liveCount').textContent = config.liveCount;
+            document.getElementById('categoryName').textContent = config.title;
+            
+            // Update page title
+            document.title = `${config.title} - BidMaster`;
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                alert('Logout successful! Redirecting to login page...');
+                window.location.href = '/custom_logout';
+            }
+        }
+
+        // Place bid function
+        function placeBid(auctionId) {
+            alert(`Placing bid on auction ${auctionId}. This will be implemented by the backend team.`);
+        }
+
+        // View auction details function
+        function viewDetails(auctionId) {
+            alert(`Viewing details for auction ${auctionId}. This will be implemented by the backend team.`);
+        }
+
+        // Toggle watch functionality
+        function toggleWatch(btn) {
+            if (btn.classList.contains('watched')) {
+                btn.classList.remove('watched');
+                btn.innerHTML = '<i class="bi bi-heart"></i>';
+                btn.title = 'Add to Watchlist';
+            } else {
+                btn.classList.add('watched');
+                btn.innerHTML = '<i class="bi bi-heart-fill"></i>';
+                btn.title = 'Remove from Watchlist';
+            }
+        }
+
+        // Load page function for pagination
+        function loadPage(pageNumber) {
+            alert(`Loading page ${pageNumber}. This will be implemented by the backend team.`);
+        }
+
+        // Optimized timer logic with better auction removal
+        let isPageReloading = false; // Global flag to prevent multiple reloads
+        let endedAuctions = new Set(); // Track ended auctions to avoid duplicate processing
+        
+        function initializeCountdowns() {
+            // Select all elements that have the countdown class
+            const countdownElements = document.querySelectorAll('.end-time-countdown');
+
+            countdownElements.forEach(element => {
+                const endDateStr = element.getAttribute('data-end-date');
+                const productId = element.getAttribute('data-product-id');
+
+                if (endDateStr && productId) {
+                    console.log(`🔍 Processing countdown for product ${productId} with date: ${endDateStr}`);
+                    const endDate = new Date(endDateStr);
+                    
+                    // Check if date parsing was successful
+                    if (isNaN(endDate.getTime())) {
+                        console.error(`❌ Invalid date format for product ${productId}: ${endDateStr}`);
+                        return;
+                    }
+                    
+                    console.log(`✅ Parsed date successfully for product ${productId}: ${endDate}`);
+
+                    // Update countdown immediately
+                    updateCountdown(endDate, element, productId);
+
+                    // Set interval to update every second
+                    setInterval(() => {
+                        updateCountdown(endDate, element, productId);
+                    }, 1000);
+                } else {
+                    console.error('❌ Missing end date or product ID for countdown element');
+                }
+            });
+        }
+
+        function updateCountdown(endDate, displayElement, productId) {
+            const now = new Date().getTime();
+            const endTime = endDate.getTime();
+            const timeRemaining = endTime - now;
+
+            // Debug logging - show product ID in logs
+            if (Math.random() < 0.01) { // Log occasionally to avoid spam
+                console.log(`⏱️ Timer check for product ${productId}: End time: ${endDate}, Now: ${new Date(now)}, Remaining: ${timeRemaining}ms`);
+            }
+
+            const parentBadge = displayElement.closest('.end-time-badge');
+
+            if (timeRemaining > 0) {
+                // Calculate time components
+                const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+                // Format as DD:HH:MM:SS
+                const formattedTime =
+                    String(days).padStart(2, '0') + ':' +
+                    String(hours).padStart(2, '0') + ':' +
+                    String(minutes).padStart(2, '0') + ':' +
+                    String(seconds).padStart(2, '0');
+
+                displayElement.textContent = formattedTime;
+
+                // Change background color based on urgency
+                if (timeRemaining < 3600000) { // Less than 1 hour
+                    parentBadge.style.background = 'rgba(220, 53, 69, 0.9)'; // Red
+                } else if (timeRemaining < 86400000) { // Less than 1 day
+                    parentBadge.style.background = 'rgba(255, 193, 7, 0.9)'; // Yellow
+                } else {
+                    parentBadge.style.background = 'rgba(0, 0, 0, 0.8)'; // Black
+                }
+
+            } else {
+                // Auction has ended - improved handling with direct product ID
+                const auctionKey = productId;
+                
+                // Check if this auction ending has already been processed
+                if (!endedAuctions.has(auctionKey)) {
+                    endedAuctions.add(auctionKey);
+                    console.log(`⏰ AUCTION ENDED! Product ${productId}, processing end...`);
+                    
+                    // Update UI immediately
+                    displayElement.textContent = 'ENDED';
+                    parentBadge.style.background = 'rgba(220, 53, 69, 0.9)';
+
+                    // Mark card as ended and start fade out
+                    const card = displayElement.closest('.auction-card');
+                    if (card) {
+                        card.classList.add('auction-ended');
+                        
+                        const liveBadge = card.querySelector('.auction-status');
+                        if (liveBadge) {
+                            liveBadge.textContent = 'ENDED';
+                            liveBadge.style.background = '#6c757d';
+                        }
+                        
+                        const actions = card.querySelector('.auction-actions');
+                        if (actions && !actions.dataset.disabled) {
+                            actions.dataset.disabled = 'true';
+                            actions.innerHTML = '<span class="text-danger fw-bold">Auction Ended</span>';
+                        }
+                        
+                        // Fade out the card over 2 seconds
+                        card.style.transition = 'opacity 2s ease-out, transform 2s ease-out';
+                        card.style.opacity = '0.3';
+                        card.style.transform = 'scale(0.95)';
+                    }
+                    
+                    // Send time_up request
+                    console.log(`🚀 Sending time_up request for product ${productId}...`);
+                    sendTimeUpRequest(productId);
+                    
+                    // Schedule page refresh to get updated data
+                    if (!isPageReloading) {
+                        isPageReloading = true;
+                        console.log(`🔄 Scheduling page refresh in 3 seconds for auction ${productId}...`);
+                        setTimeout(() => {
+                            console.log('🔄 Refreshing page to show updated auction list...');
+                            window.location.reload();
+                        }, 3000);
+                    }
+                }
+            }
+        }
+
+        // Function to extract product ID from the countdown element
+        function getProductIdFromElement(element) {
+            console.log('🔍 Attempting to extract product ID...');
+            const card = element.closest('.auction-card');
+            if (card) {
+                console.log('✅ Found auction card');
+                
+                // Try to find product ID from show_details links
+                const productLink = card.querySelector('a[href*="/show_details/"]');
+                if (productLink) {
+                    const href = productLink.getAttribute('href');
+                    console.log(`🔗 Found show_details link: ${href}`);
+                    const match = href.match(/\/show_details\/(\d+)/);
+                    if (match) {
+                        console.log(`✅ Extracted product ID: ${match[1]}`);
+                        return match[1];
+                    }
+                }
+                
+                // Fallback: try product_details pattern if it exists
+                const fallbackLink = card.querySelector('a[href*="/product_details/"]');
+                if (fallbackLink) {
+                    const href = fallbackLink.getAttribute('href');
+                    console.log(`🔗 Found product_details link: ${href}`);
+                    const match = href.match(/\/product_details\/(\d+)/);
+                    if (match) {
+                        console.log(`✅ Extracted product ID from fallback: ${match[1]}`);
+                        return match[1];
+                    }
+                }
+                
+                // Alternative: look for data-product-id attribute if available
+                const productId = card.dataset.productId;
+                if (productId) {
+                    console.log(`✅ Found product ID in data attribute: ${productId}`);
+                    return productId;
+                }
+                
+                console.log('❌ No product links found in card');
+            } else {
+                console.log('❌ No auction card found');
+            }
+            return null;
+        }
+
+        // Function to get CSRF token from cookies
+        function getCSRFToken() {
+            const cookieValue = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (cookieValue) {
+                return cookieValue.value;
+            }
+            
+            // Fallback: try to get from cookies
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'csrftoken') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Enhanced function to send time_up request to backend
+        function sendTimeUpRequest(productId) {
+            console.log(`🚀 Sending time_up request for product ${productId}...`);
+            
+            const csrfToken = getCSRFToken();
+            console.log(`🔐 CSRF Token: ${csrfToken ? 'Found' : 'NOT FOUND'}`);
+            
+            const headers = {
+                'X-Requested-With': 'XMLHttpRequest',
+            };
+            
+            // Add CSRF token if available
+            if (csrfToken) {
+                headers['X-CSRFToken'] = csrfToken;
+            }
+            
+            // Send request with timeout
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+            
+            fetch(`/time_up/${productId}`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'same-origin',
+                signal: controller.signal
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                console.log(`📡 Response received for product ${productId}: Status ${response.status}`);
+                
+                if (response.ok) {
+                    console.log(`✅ Time up request sent successfully for product ${productId}`);
+                    showNotification(`Auction ended for product ${productId}. Page will refresh...`, 'success');
+                } else {
+                    console.warn(`⚠️ Time up request returned ${response.status} for product ${productId}`);
+                    showNotification(`Auction ended, but server response was ${response.status}`, 'warning');
+                }
+            })
+            .catch(error => {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    console.warn(`⏱️ Time up request timed out for product ${productId}`);
+                    showNotification('Auction ended (request timed out)', 'warning');
+                } else {
+                    console.error(`💥 Error sending time up request for product ${productId}:`, error);
+                    showNotification('Auction ended (error occurred)', 'warning');
+                }
+            });
+        }
+
+
+
+        // Function to show notifications to user
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            let alertClass, iconClass;
+            
+            switch(type) {
+                case 'success':
+                    alertClass = 'alert-success';
+                    iconClass = 'bi-check-circle';
+                    break;
+                case 'warning':
+                    alertClass = 'alert-warning';
+                    iconClass = 'bi-exclamation-triangle';
+                    break;
+                case 'error':
+                    alertClass = 'alert-danger';
+                    iconClass = 'bi-exclamation-circle';
+                    break;
+                default:
+                    alertClass = 'alert-info';
+                    iconClass = 'bi-info-circle';
+            }
+            
+            notification.className = `alert ${alertClass} position-fixed`;
+            notification.style.cssText = `
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border: none;
+                border-radius: 8px;
+                animation: slideInRight 0.3s ease;
+            `;
+            notification.innerHTML = `
+                <i class="bi ${iconClass}"></i>
+                ${message}
+            `;
+            
+            // Add CSS animation
+            if (!document.getElementById('notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOutRight {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds with animation
+            setTimeout(() => {
+                notification.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Function to check for auctions that are already expired on page load
+        function checkForExpiredAuctions() {
+            console.log('🔍 Checking for already expired auctions...');
+            const countdownElements = document.querySelectorAll('.end-time-countdown');
+            const now = new Date().getTime();
+            let expiredCount = 0;
+            
+            countdownElements.forEach(element => {
+                const endDateStr = element.getAttribute('data-end-date');
+                const productId = element.getAttribute('data-product-id');
+                
+                if (endDateStr && productId) {
+                    const endDate = new Date(endDateStr);
+                    const timeRemaining = endDate.getTime() - now;
+                    
+                    if (timeRemaining <= 0) {
+                        console.log(`🚨 Found expired auction on load: Product ${productId}`);
+                        expiredCount++;
+                        
+                        // Immediately process this expired auction
+                        if (!endedAuctions.has(productId)) {
+                            endedAuctions.add(productId);
+                            
+                            // Update UI immediately
+                            element.textContent = 'ENDED';
+                            const parentBadge = element.closest('.end-time-badge');
+                            if (parentBadge) {
+                                parentBadge.style.background = 'rgba(220, 53, 69, 0.9)';
+                            }
+
+                            // Mark card as ended
+                            const card = element.closest('.auction-card');
+                            if (card) {
+                                card.classList.add('auction-ended');
+                                
+                                const liveBadge = card.querySelector('.auction-status');
+                                if (liveBadge) {
+                                    liveBadge.textContent = 'ENDED';
+                                    liveBadge.style.background = '#6c757d';
+                                }
+                                
+                                const actions = card.querySelector('.auction-actions');
+                                if (actions && !actions.dataset.disabled) {
+                                    actions.dataset.disabled = 'true';
+                                    actions.innerHTML = '<span class="text-danger fw-bold">Auction Ended</span>';
+                                }
+                                
+                                // Fade out the card
+                                card.style.transition = 'opacity 2s ease-out, transform 2s ease-out';
+                                card.style.opacity = '0.3';
+                                card.style.transform = 'scale(0.95)';
+                            }
+                            
+                            // Send time_up request for this expired auction
+                            setTimeout(() => {
+                                sendTimeUpRequest(productId);
+                            }, 1000); // Delay to let the page fully load first
+                        }
+                    }
+                }
+            });
+            
+            if (expiredCount > 0) {
+                console.log(`⚠️ Found ${expiredCount} expired auctions on page load`);
+                // Schedule page refresh to get updated data
+                if (!isPageReloading) {
+                    isPageReloading = true;
+                    console.log('🔄 Scheduling page refresh in 5 seconds due to expired auctions...');
+                    setTimeout(() => {
+                        console.log('🔄 Refreshing page to remove expired auctions...');
+                        window.location.reload();
+                    }, 5000);
+                }
+            } else {
+                console.log('✅ No expired auctions found on page load');
+            }
+        }
+
+        // Event listener to start countdowns when the page is fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Page loaded, initializing countdown timers...');
+            initializeCountdowns();
+            
+            // Add a small test to verify everything is working
+            const countdownElements = document.querySelectorAll('.end-time-countdown');
+            console.log(`📊 Found ${countdownElements.length} countdown elements to monitor`);
+            
+            // Check for auctions that may have already expired
+            checkForExpiredAuctions();
+            
+            // Log current time for debugging
+            console.log(`🕒 Current time: ${new Date()}`);
+            
+            // Check if CSRF token is available
+            const csrfToken = getCSRFToken();
+            console.log(`🔐 CSRF Token status: ${csrfToken ? 'Available' : 'Missing'}`);
+            
+            // Test each countdown element
+            countdownElements.forEach((element, index) => {
+                const endDateStr = element.getAttribute('data-end-date');
+                console.log(`📅 Element ${index + 1}: End date = ${endDateStr}`);
+                if (endDateStr) {
+                    const endDate = new Date(endDateStr);
+                    const now = new Date();
+                    const timeRemaining = endDate.getTime() - now.getTime();
+                    console.log(`⏱️ Element ${index + 1}: Time remaining = ${timeRemaining}ms (${Math.floor(timeRemaining / 1000)} seconds)`);
+                    
+                    // If auction should have already ended, let's see what happens
+                    if (timeRemaining <= 0) {
+                        console.log(`🚨 Element ${index + 1}: AUCTION SHOULD BE ENDED!`);
+                    }
+                }
+            });
+            
+            // Set up periodic check for expired auctions every 30 seconds
+            setInterval(() => {
+                if (!isPageReloading) {
+                    console.log('🔄 Performing periodic check for expired auctions...');
+                    checkForExpiredAuctions();
+                }
+            }, 30000); // Check every 30 seconds
+            
+            console.log('✅ Category page auction monitoring fully initialized');
+        });
+
+        // Other existing functions
+        function initializePage() {
+            const liveBadges = document.querySelectorAll('.live-badge');
+            liveBadges.forEach(badge => {
+                setTimeout(() => {
+                    badge.style.animation = 'pulse 2s infinite';
+                }, Math.random() * 2000);
+            });
+        }
+
+        function placeBid(auctionId) {
+            const modal = new bootstrap.Modal(document.getElementById('bidModal'));
+            modal.show();
+        }
+
+        function viewDetails(auctionId) {
+            window.location.href = `/show_details/${auctionId}`;
+        }
+
+        function toggleWatch(btn) {
+            if (!btn.classList.contains('watched')) {
+                btn.classList.add('watched');
+                btn.innerHTML = '<i class="bi bi-heart-fill"></i>';
+                btn.title = 'Remove from Watchlist';
+            } else {
+                btn.classList.remove('watched');
+                btn.innerHTML = '<i class="bi bi-heart"></i>';
+                btn.title = 'Add to Watchlist';
+            }
+        }
+
+        function loadPage(pageNumber) {
+            alert(`Loading page ${pageNumber}. This will be implemented by the backend team.`);
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/custom_logout';
+            }
+        }
+
+        // Search and Filter Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const clearSearchBtn = document.getElementById('clearSearch');
+            const sortFilter = document.getElementById('sortFilter');
+            const priceFilter = document.getElementById('priceFilter');
+            const auctionsGrid = document.getElementById('auctionsGrid');
+            
+            // Initialize search and filter functionality
+            initializeSearchAndFilter();
+            
+            function initializeSearchAndFilter() {
+                // Search functionality with debounce for better performance
+                let searchTimeout;
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        filterAndSortAuctions();
+                        highlightSearchTerms();
+                    }, 300); // 300ms debounce
+                });
+                
+                // Clear search button
+                clearSearchBtn.addEventListener('click', function() {
+                    searchInput.value = '';
+                    filterAndSortAuctions();
+                    clearHighlights();
+                    searchInput.focus();
+                });
+                
+                // Show/hide clear button based on input
+                searchInput.addEventListener('input', function() {
+                    clearSearchBtn.style.display = this.value.trim() ? 'block' : 'none';
+                });
+                
+                // Sort functionality
+                sortFilter.addEventListener('change', function() {
+                    filterAndSortAuctions();
+                });
+                
+                // Price filter functionality
+                priceFilter.addEventListener('change', function() {
+                    filterAndSortAuctions();
+                });
+                
+                // Enter key to search
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        filterAndSortAuctions();
+                    }
+                });
+                
+                // Initial clear button state
+                clearSearchBtn.style.display = 'none';
+            }
+            
+            function filterAndSortAuctions() {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const sortBy = sortFilter.value;
+                const priceRange = priceFilter.value;
+                const auctionCards = Array.from(auctionsGrid.children);
+                
+                // Filter cards with enhanced search
+                let visibleCards = auctionCards.filter(card => {
+                    const cardElement = card.querySelector('[data-name]');
+                    if (!cardElement) return false;
+                    
+                    // Get all searchable content
+                    const name = cardElement.getAttribute('data-name') || '';
+                    const category = cardElement.getAttribute('data-category') || '';
+                    const description = cardElement.getAttribute('data-description') || '';
+                    const seller = cardElement.getAttribute('data-seller') || '';
+                    const searchableContent = cardElement.getAttribute('data-searchable') || '';
+                    
+                    const price = parseFloat(cardElement.getAttribute('data-price')) || 0;
+                    
+                    // Enhanced search - check multiple fields
+                    let matchesSearch = true;
+                    if (searchTerm) {
+                        const searchWords = searchTerm.split(' ').filter(word => word.length > 0);
+                        matchesSearch = searchWords.every(word => 
+                            name.includes(word) || 
+                            category.includes(word) || 
+                            description.includes(word) || 
+                            seller.includes(word) ||
+                            searchableContent.includes(word)
+                        );
+                    }
+                    
+                    // Price filter
+                    let matchesPrice = true;
+                    if (priceRange) {
+                        if (priceRange === '0-100') {
+                            matchesPrice = price >= 0 && price <= 100;
+                        } else if (priceRange === '100-500') {
+                            matchesPrice = price > 100 && price <= 500;
+                        } else if (priceRange === '500-1000') {
+                            matchesPrice = price > 500 && price <= 1000;
+                        } else if (priceRange === '1000-5000') {
+                            matchesPrice = price > 1000 && price <= 5000;
+                        } else if (priceRange === '5000+') {
+                            matchesPrice = price > 5000;
+                        }
+                    }
+                    
+                    const isVisible = matchesSearch && matchesPrice;
+                    
+                    // Add visual feedback for search matches
+                    if (isVisible && searchTerm) {
+                        card.classList.add('search-match');
+                    } else {
+                        card.classList.remove('search-match');
+                    }
+                    
+                    return isVisible;
+                });
+                
+                // Enhanced sorting with more options
+                visibleCards.sort((a, b) => {
+                    const aElement = a.querySelector('[data-name]');
+                    const bElement = b.querySelector('[data-name]');
+                    
+                    if (!aElement || !bElement) return 0;
+                    
+                    const aPrice = parseFloat(aElement.getAttribute('data-price')) || 0;
+                    const bPrice = parseFloat(bElement.getAttribute('data-price')) || 0;
+                    const aBids = parseInt(aElement.getAttribute('data-bids')) || 0;
+                    const bBids = parseInt(bElement.getAttribute('data-bids')) || 0;
+                    const aEnding = new Date(aElement.getAttribute('data-ending'));
+                    const bEnding = new Date(bElement.getAttribute('data-ending'));
+                    const aCreated = new Date(aElement.getAttribute('data-created'));
+                    const bCreated = new Date(bElement.getAttribute('data-created'));
+                    const aName = aElement.getAttribute('data-name') || '';
+                    const bName = bElement.getAttribute('data-name') || '';
+                    
+                    switch (sortBy) {
+                        case 'ending-soon':
+                            return aEnding - bEnding;
+                        case 'newest':
+                            return bCreated - aCreated;
+                        case 'price-low':
+                            return aPrice - bPrice;
+                        case 'price-high':
+                            return bPrice - aPrice;
+                        case 'most-bids':
+                            return bBids - aBids;
+                        case 'alphabetical':
+                            return aName.localeCompare(bName);
+                        default:
+                            return aEnding - bEnding;
+                    }
+                });
+                
+                // Hide all cards first
+                auctionCards.forEach(card => {
+                    card.style.display = 'none';
+                });
+                
+                // Show and reorder visible cards with smooth animation
+                visibleCards.forEach((card, index) => {
+                    card.style.display = 'block';
+                    card.style.order = index;
+                    
+                    // Add fade-in animation
+                    card.style.opacity = '0';
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.3s ease-in-out';
+                        card.style.opacity = '1';
+                    }, index * 50); // Staggered animation
+                });
+                
+                // Update results count and show no results message if needed
+                updateResultsCount(visibleCards.length, auctionCards.length);
+                showNoResultsMessage(visibleCards.length, searchTerm);
+            }
+            
+            function updateResultsCount(visible, total) {
+                // Remove existing results message
+                const existingMessage = document.getElementById('searchResults');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+                
+                // Add new results message if search or filter is active
+                const isFiltered = searchInput.value.trim() !== '' || priceFilter.value !== '';
+                
+                if (isFiltered) {
+                    const resultsMessage = document.createElement('div');
+                    resultsMessage.id = 'searchResults';
+                    resultsMessage.className = 'alert alert-info mb-4';
+                    resultsMessage.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="bi bi-search"></i> 
+                                Showing <strong>${visible}</strong> of <strong>${total}</strong> auctions
+                                ${searchInput.value.trim() ? `for "<em>${searchInput.value}</em>"` : ''}
+                            </span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAllFilters()">
+                                <i class="bi bi-x"></i> Clear All Filters
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Insert before auctions grid
+                    auctionsGrid.parentNode.insertBefore(resultsMessage, auctionsGrid);
+                }
+            }
+            
+            function showNoResultsMessage(visibleCount, searchTerm) {
+                // Remove existing no results message
+                const existingNoResults = document.getElementById('noResults');
+                if (existingNoResults) {
+                    existingNoResults.remove();
+                }
+                
+                if (visibleCount === 0 && (searchTerm || priceFilter.value)) {
+                    const noResultsMessage = document.createElement('div');
+                    noResultsMessage.id = 'noResults';
+                    noResultsMessage.className = 'alert alert-warning text-center mb-4';
+                    noResultsMessage.innerHTML = `
+                        <div class="py-4">
+                            <i class="bi bi-search-heart-fill fs-1 text-muted d-block mb-3"></i>
+                            <h5>No auctions found</h5>
+                            <p class="text-muted mb-3">
+                                ${searchTerm ? `No results for "<strong>${searchTerm}</strong>"` : 'No auctions match your filters'}
+                            </p>
+                            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="clearAllFilters()">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Clear Filters
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showSearchTips()">
+                                    <i class="bi bi-lightbulb"></i> Search Tips
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Insert after filter section
+                    const filterSection = document.querySelector('.filter-section').parentElement.parentElement;
+                    filterSection.insertAdjacentElement('afterend', noResultsMessage);
+                }
+            }
+            
+            function highlightSearchTerms() {
+                if (!searchInput.value.trim()) return;
+                
+                const searchWords = searchInput.value.toLowerCase().trim().split(' ');
+                const visibleCards = document.querySelectorAll('#auctionsGrid > div[style*="block"]');
+                
+                visibleCards.forEach(card => {
+                    const titleElement = card.querySelector('.card-title');
+                    const categoryElement = card.querySelector('.auction-category');
+                    
+                    if (titleElement && categoryElement) {
+                        // Highlight in title
+                        highlightText(titleElement, searchWords);
+                        // Highlight in category if visible
+                        highlightText(categoryElement, searchWords);
+                    }
+                });
+            }
+            
+            function highlightText(element, searchWords) {
+                const originalText = element.textContent;
+                let highlightedText = originalText;
+                
+                searchWords.forEach(word => {
+                    if (word.length > 2) { // Only highlight words longer than 2 chars
+                        const regex = new RegExp(`(${word})`, 'gi');
+                        highlightedText = highlightedText.replace(regex, '<mark class="search-highlight">$1</mark>');
+                    }
+                });
+                
+                if (highlightedText !== originalText) {
+                    element.innerHTML = highlightedText;
+                }
+            }
+            
+            function clearHighlights() {
+                const highlights = document.querySelectorAll('.search-highlight');
+                highlights.forEach(highlight => {
+                    const parent = highlight.parentNode;
+                    parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                    parent.normalize();
+                });
+            }
+            
+            // Global function to clear all filters
+            window.clearAllFilters = function() {
+                searchInput.value = '';
+                priceFilter.value = '';
+                sortFilter.value = 'ending-soon';
+                clearSearchBtn.style.display = 'none';
+                clearHighlights();
+                filterAndSortAuctions();
+                
+                // Remove any existing messages
+                const searchResults = document.getElementById('searchResults');
+                const noResults = document.getElementById('noResults');
+                if (searchResults) searchResults.remove();
+                if (noResults) noResults.remove();
+                
+                // Focus back to search input
+                searchInput.focus();
+            };
+            
+            // Global function for search tips
+            window.showSearchTips = function() {
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.innerHTML = `
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-lightbulb text-warning"></i> Search Tips
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <strong>Product Names:</strong> Search by auction title (e.g., "iPhone", "laptop")
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <strong>Categories:</strong> Search by category (e.g., "electronics", "jewelry")
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <strong>Descriptions:</strong> Search within item descriptions
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <strong>Multiple Words:</strong> Use multiple words for better results
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="bi bi-check-circle text-success"></i>
+                                        <strong>Combine Filters:</strong> Use search with price filters for precise results
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Got it!</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+                
+                // Remove modal from DOM when hidden
+                modal.addEventListener('hidden.bs.modal', () => {
+                    modal.remove();
+                });
+            };
+        });
+        
+        // Additional helper function to format time remaining
+        function formatTimeRemaining(endDate) {
+            const now = new Date().getTime();
+            const end = new Date(endDate).getTime();
+            const timeLeft = end - now;
+            
+            if (timeLeft <= 0) {
+                return "EXPIRED";
+            }
+            
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            return `${days.toString().padStart(2, '0')}:${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+    </script>
+</body>
+</html>

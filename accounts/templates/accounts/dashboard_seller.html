@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard - BidMaster</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+</head>
+<body class="bg-light">
+    
+   
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">
+                <i class="bi bi-hammer"></i>
+                <span>BidMaster</span>
+            </a>
+            <button class="btn btn-link sidebar-toggle d-lg-none" id="sidebarToggle">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="sidebar-content">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    <i class="bi bi-person-circle"></i>
+                </div>
+                <div class="user-info">
+                    <h6>{{name}} Seller</h6>
+                    <span class="badge bg-success">Verified</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" data-section="dashboard">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/live">
+                            <i class="bi bi-hammer"></i>
+                            <span>My Auctions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/new_auction">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Create Auction</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2" href="/chatbot">
+                        <i class="bi bi-robot fs-5" style="color:#ffffff;"></i>
+                            <span>AI Auction Assistant</span>
+                         </a>
+                    </li>
+
+                    
+                </ul>
+            </nav>
+        </div>
+        
+        <div class="sidebar-footer">
+            <a href="#" class="btn btn-outline-danger w-100" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navigation -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+            <div class="container-fluid">
+                <button class="btn btn-link d-lg-none" id="sidebarToggleMobile">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <div class="navbar-brand d-lg-none">
+                    <i class="bi bi-hammer"></i> BidMaster
+                </div>
+                
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <button class="btn btn-link" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle fs-4"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-person"></i> Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Content -->
+        <div class="content-area" id="contentArea">
+            <!-- Dashboard Section -->
+            <div class="content-section active" id="dashboard">
+                <div class="container-fluid py-4">
+                    <!-- Welcome Header -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="welcome-header">
+                                <h1 class="mb-2">Welcome back,{{name}}! 👋</h1>
+                                <p class="text-muted">Here's what's happening with your auctions today.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stats-card pending" onclick="navigateToPage('pending-approval')">
+                                <div class="stats-icon">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{pendings}}</h3>
+                                    <p>Pending Approval</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stats-card live" onclick="navigateToPage('live-auctions')">
+                                <div class="stats-icon">
+                                    <i class="bi bi-broadcast"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{live}}</h3>
+                                    <p>Live Auctions</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stats-card sold" onclick="navigateToPage('sold-items')">
+                                <div class="stats-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{sold}}</h3>
+                                    <p>Sold Items</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stats-card inactive" onclick="navigateToPage('inactive')">
+                                <div class="stats-icon">
+                                    <i class="bi bi-pause-circle"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3>{{inactive}}</h3>
+                                    <p>Inactive</p>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions & Recent Activity -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-8">
+                            <div class="card dashboard-card">
+                                <div class="card-header">
+                                    {% if updates %}
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-activity"></i> Recent Activity
+                                    </h5>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <div class="activity-list">
+                                        {% for record in updates %}
+                                        <div class="activity-item">
+                                            {% if record.type == 'sold' %}
+                                            <div class="activity-icon bg-primary">
+                                                <i class="bi bi-currency-dollar"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if record.type == 'inactive' %}
+                                            <div class="activity-icon bg-warning">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if record.type == 'active' %}
+                                            <div class="activity-icon bg-info">
+                                                <i class="bi bi-check-circle"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if record.type == 'bid' %}
+                                            <div class="activity-icon bg-primary">
+                                                <i class="bi bi-currency-dollar"></i>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <div class="activity-content">
+                                                <h5> {{record.message_head}} </h6>
+                                                <p><b> {{record.message}} </b></p>
+                                                <small class="text-muted">{{record.time}}</small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                        
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="card dashboard-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-lightning-charge"></i> Quick Actions
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="quick-actions">
+                                        <button class="btn btn-primary btn-custom w-100 mb-3" onclick="window.location.href='/new_auction'">
+                                            <i class="bi bi-plus-circle"></i> Create New Auction
+                                        </button>
+                                        <button class="btn btn-outline-success btn-custom w-100 mb-3" onclick="window.location.href='/live'">
+                                            <i class="bi bi-eye"></i> View My Auctions
+                                        </button>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row g-4">
+                        <div class="col-lg-8">
+                            <div class="card dashboard-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-graph-up-arrow"></i> Sales Overview
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="salesChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="card dashboard-card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-pie-chart"></i> Auction Status
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="statusChart" height="200"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More sections for sales-history -->
+            <div class="content-section" id="sales-history">
+                <div class="container-fluid py-4">
+                    <h2><i class="bi bi-clock-history"></i> Sales History</h2>
+                    <p class="text-muted">View your completed sales</p>
+                    <!-- Sales history content here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <style>
+        /* Dashboard Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .sidebar-brand {
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-brand:hover {
+            color: white;
+        }
+
+        .sidebar-toggle {
+            color: white;
+            border: none;
+            background: none;
+            font-size: 1.5rem;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        .user-profile {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .user-info h6 {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            border: none;
+            background: transparent;
+        }
+
+        .sidebar-nav .nav-link:hover,
+        .sidebar-nav .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .sidebar-nav .nav-link i {
+            font-size: 1.1rem;
+            width: 20px;
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-footer .btn {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-footer .btn:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            min-height: 100vh;
+            background: #f8f9fa;
+            transition: margin-left 0.3s ease;
+        }
+
+        .content-area {
+            padding: 0;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* Top Navigation */
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+            padding: 1rem 1.5rem;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding-right: 2.5rem;
+            border-radius: 25px;
+            border: 1px solid #e0e0e0;
+            width: 300px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .notification-icon {
+            position: relative;
+            font-size: 1.5rem;
+            color: #6c757d;
+            cursor: pointer;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,.15);
+        }
+
+        .stats-card.pending {
+            border-left-color: #ffc107;
+        }
+
+        .stats-card.live {
+            border-left-color: #28a745;
+        }
+
+        .stats-card.sold {
+            border-left-color: #007bff;
+        }
+
+        .stats-card.inactive {
+            border-left-color: #6c757d;
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stats-card.pending .stats-icon {
+            background: linear-gradient(135deg, #ffc107, #ffb300);
+        }
+
+        .stats-card.live .stats-icon {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .stats-card.sold .stats-icon {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .stats-card.inactive .stats-icon {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        .stats-info h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0;
+            color: #333;
+        }
+
+        .stats-info p {
+            margin: 0;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stats-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.875rem;
+            color: #28a745;
+            margin-top: 0.5rem;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .dashboard-card .card-header {
+            background: transparent;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1.5rem 1.5rem 1rem;
+        }
+
+        .dashboard-card .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        /* Activity List */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: background 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: #e9ecef;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .activity-content h6 {
+            margin: 0 0 0.25rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .activity-content p {
+            margin: 0 0 0.25rem 0;
+            color: #666;
+        }
+
+        /* Quick Actions */
+        .quick-actions .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        /* Welcome Header */
+        .welcome-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+        }
+
+        .welcome-header h1 {
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* Auction Item Cards */
+        .auction-item-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .auction-item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,.15);
+        }
+
+        .auction-image {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+        }
+
+        .auction-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .auction-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .auction-status.live {
+            background: #28a745;
+        }
+
+        .auction-status.pending {
+            background: #ffc107;
+        }
+
+        .auction-status.sold {
+            background: #007bff;
+        }
+
+        .auction-status.inactive {
+            background: #6c757d;
+        }
+
+        .auction-details {
+            padding: 1.5rem;
+        }
+
+        .auction-details h6 {
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .auction-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .auction-meta div {
+            text-align: center;
+        }
+
+        .auction-meta small {
+            color: #666;
+            display: block;
+        }
+
+        .auction-meta strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .auction-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: space-between;
+        }
+
+        .auction-actions .btn {
+            flex: 1;
+            border-radius: 8px;
+        }
+
+        /* Mobile Responsive */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        @media (max-width: 991px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .search-box input {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+
+            .search-box input {
+                width: 150px;
+            }
+
+            .auction-meta {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        /* Custom scrollbar for sidebar */
+        .sidebar-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
+        }
+    </style>
+
+    <script>
+        // Dashboard JavaScript functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Sidebar navigation
+            const sidebarLinks = document.querySelectorAll('.sidebar-nav .nav-link[data-section]');
+            const contentSections = document.querySelectorAll('.content-section');
+            const quickActionBtns = document.querySelectorAll('.quick-actions .btn[data-section]');
+            
+
+            // Handle sidebar navigation for remaining sections
+            function showSection(sectionId) {
+                // Hide all sections
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show target section
+                const targetSection = document.getElementById(sectionId);
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                }
+                
+                // Update active link
+                sidebarLinks.forEach(link => {
+                    link.classList.remove('active');
+                });
+                
+                const activeLink = document.querySelector(`[data-section="${sectionId}"]`);
+                if (activeLink && activeLink.classList.contains('nav-link')) {
+                    activeLink.classList.add('active');
+                }
+            }
+
+            // Add click handlers to sidebar links (only for remaining sections)
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        showSection(sectionId);
+                        // Close mobile sidebar
+                        closeMobileSidebar();
+                    }
+                });
+            });
+
+            // Add click handlers to quick action buttons (only for remaining sections)
+            quickActionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+                    if (sectionId) {
+                        showSection(sectionId);
+                    }
+                });
+            });
+
+            // Mobile sidebar toggle
+            const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            function openMobileSidebar() {
+                sidebar.classList.add('show');
+                sidebarOverlay.classList.add('show');
+            }
+
+            function closeMobileSidebar() {
+                sidebar.classList.remove('show');
+                sidebarOverlay.classList.remove('show');
+            }
+
+            if (sidebarToggleMobile) {
+                sidebarToggleMobile.addEventListener('click', openMobileSidebar);
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', closeMobileSidebar);
+            }
+
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            }
+
+            // Initialize charts
+            initializeCharts();
+
+            // Animate stats cards on load
+            animateStatsCards();
+        });
+
+        // Initialize Chart.js charts
+        function initializeCharts() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart');
+            if (salesCtx) {
+                new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                        datasets: [{
+                            label: 'Sales ($)',
+                            data: [1200, 1900, 3000, 5000, 2000, 3000],
+                            borderColor: 'rgb(102, 126, 234)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Status Chart
+            
+            const statusCtx = document.getElementById('statusChart');
+            if (statusCtx) {
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Live', 'Pending', 'Sold', 'Inactive'],
+                        datasets: [{
+                            data: [{{live}},{{pendings}},{{sold}},{{inactive}}],
+                            backgroundColor: [
+                                '#28a745',
+                                '#ffc107',
+                                '#007bff',
+                                '#6c757d'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Animate stats cards with counting effect
+        function animateStatsCards() {
+            const statsNumbers = document.querySelectorAll('.stats-info h3');
+            
+            statsNumbers.forEach(number => {
+                const finalNumber = parseInt(number.textContent);
+                let currentNumber = 0;
+                const increment = finalNumber / 20;
+                const timer = setInterval(() => {
+                    currentNumber += increment;
+                    if (currentNumber >= finalNumber) {
+                        number.textContent = finalNumber;
+                        clearInterval(timer);
+                    } else {
+                        number.textContent = Math.floor(currentNumber);
+                    }
+                }, 50);
+            });
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Here you would typically make an API call to logout
+                alert('Logout successful! Redirecting to Home page...');
+                // Redirect to login page
+                window.location.href = '/custom_logout';
+            }
+        }
+
+        // Navigate to different pages function
+        function navigateToPage(page) {
+            switch(page) {
+                case 'pending-approval':
+                    window.location.href = '/pending';
+                    break;
+                case 'live-auctions':
+                    window.location.href = '/live';
+                    break;
+                case 'sold-items':
+                    window.location.href = '/sold';
+                    break;
+                case 'inactive':
+                    window.location.href = '/inactive';
+                    break;
+                default:
+                    console.log('Unknown page:', page);
+            }
+        }
+
+        // Real-time updates simulation
+        function simulateRealTimeUpdates() {
+            setInterval(() => {
+                // Update notification count
+                const notificationBadge = document.querySelector('.notification-badge');
+                if (notificationBadge) {
+                    let count = parseInt(notificationBadge.textContent);
+                    count = Math.max(0, count + (Math.random() > 0.7 ? 1 : -1));
+                    notificationBadge.textContent = count;
+                }
+
+                // Update message count
+                const messageBadge = document.querySelector('.sidebar-nav .badge');
+                if (messageBadge && Math.random() > 0.8) {
+                    let count = parseInt(messageBadge.textContent);
+                    count = Math.max(0, count + 1);
+                    messageBadge.textContent = count;
+                }
+            }, 10000); // Update every 10 seconds
+        }
+
+        // Start real-time updates
+        simulateRealTimeUpdates();
+    </script>
+</body>
+</html>
